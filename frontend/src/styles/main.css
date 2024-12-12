@@ -1,0 +1,18 @@
+.main-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    height: 100vh;
+  }
+
+  .main-header-h1{
+    font-size: 40px;
+    font-weight: bold;
+  }
+
+  .main-header-p{
+    font-size: 20px;
+    margin-top: 8px;
+    width: 600px;
+  }
