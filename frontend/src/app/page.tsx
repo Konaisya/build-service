@@ -1,9 +1,11 @@
 "use client"
-import { useState } from 'react';
-import "@/styles/main.css";
-import Image from "next/image";
 
-const Page = () => {
+import "@/styles/main.css"
+import Image from "next/image"
+
+
+
+export default function Home() {
   return (
   
     <div className="main-header">
@@ -19,6 +21,4 @@ const Page = () => {
     </div>
  
   );
-};
-
-export default Page;
+}
