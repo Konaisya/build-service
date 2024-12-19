@@ -1,0 +1,105 @@
+.burger-button {
+    position: fixed; 
+    background: none;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    margin-right:32px;
+    z-index: 1000; 
+    top: 50%;
+    transition: margin-left 0.3s ease;
+    font-size: 24px;
+}
+.button-span{
+    color: rgb(94, 110, 255);
+    font-size: 24px;
+    transition: color 0.8s ease;
+}
+
+.sidebar-open {
+    margin-left: 500px; 
+}
+
+.sidebar-open .button-span{
+    color: red;
+    transition: color 0.8s ease;
+}
+
+.sidebar {
+    position: fixed;
+    left: -500px; 
+    width: 500px;
+    height: 100%;
+    background-color: #00d9ff4d;
+    color: rgb(0, 0, 0);
+    backdrop-filter: blur(16px);
+    transition: left 0.3s ease; 
+    padding: 20px;
+    z-index: 999;
+}
+
+.sidebar h2 {
+    text-align: center; 
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.sidebar ul {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    list-style-type: none;
+    padding: 8px;
+    background-color: rgba(0, 0, 0, 0.349);
+    backdrop-filter: blur(16px);
+    border-radius: 8px;
+    justify-content: center;
+    height: 100%;
+   
+}
+
+.sidebar ul li {
+    font-size: 28px;
+}
+
+
+.sidebar li{
+    width: 50%;
+    margin-bottom: 32px;
+    /* text-align: center; */
+    text-decoration: none;
+    color: white;
+}
+
+.headerLink{
+    position: relative; 
+    color: white;
+    text-decoration: none; 
+}
+
+.headerLink::after{
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 100%;
+    height: 3px; 
+    background: rgb(255, 255, 255); 
+    transform: scaleX(0);
+    transform-origin: bottom right;
+    transition: transform 0.3s ease; 
+}
+
+.headerLink:hover::after {
+    transform: scaleX(1);
+    transform-origin: bottom left;
+}
+
+.sidebar.show {
+    left: 0;
+}
