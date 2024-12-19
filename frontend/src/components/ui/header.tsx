@@ -11,9 +11,10 @@ const Header = () => {
     return ( 
         <>
         <div className='btnContainer'>
-        <button className='sidebar-button' onClick={toggleSidebar}>
-          {isSidebarOpen ? 'Скрыть меню' : 'Показать меню'}
-        </button></div>
+          <button className='sidebar-button' onClick={toggleSidebar}>
+            {isSidebarOpen ? 'Скрыть меню' : 'Показать меню'}
+          </button>
+        </div>
         <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
         </>
      );

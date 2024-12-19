@@ -13,9 +13,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
         <div className={`sidebar ${isOpen ? 'show' : ''}`}>
             <h2>Меню</h2>
             <ul>
-                
-                
-                   <li><Link href='#'  className='headerLink  '/> gavno</li>
+                <li><Link href='#'  className='headerLink  '/> gavno</li>
                 <li><Link href='#'  className='headerLink  '/>  zalupa  </li>
             </ul>
         </div>
