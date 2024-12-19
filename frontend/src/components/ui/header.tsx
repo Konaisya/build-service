@@ -1,23 +1,30 @@
-"use client"
-import Sidebar from "@/components/ui/sidebar";
+"use client";
 import { useState } from 'react';
-import "@/styles/main.css";
+import "@/styles/header.css";
+import Link from 'next/link';
+
 const Header = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
 
     const toggleSidebar = () => {
-      setIsSidebarOpen(!isSidebarOpen);
+        setIsSidebarOpen(!isSidebarOpen);
     };
-    return ( 
+
+    return (
         <>
-        <div className='btnContainer'>
-          <button className='sidebar-button' onClick={toggleSidebar}>
-            {isSidebarOpen ? 'Скрыть меню' : 'Показать меню'}
-          </button>
-        </div>
-        <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+            <div className={`burger-button ${isSidebarOpen ? 'sidebar-open' : ''}`}>
+                <button className="burger-button" onClick={toggleSidebar}><span className='button-span'>Н</span>авигация</button>
+            </div>
+            <div className={`sidebar ${isSidebarOpen ? 'show' : ''}`}>
+                <ul>
+                    <li><Link href='/' className='headerLink'>Главная</Link></li>
+                    <li><Link href='/services' className='headerLink'>Услуги</Link></li>
+                    <li><Link href='#' className='headerLink'>О нас</Link></li>
+                    <li><Link href='#' className='headerLink'>Профиль</Link></li>
+                </ul>
+            </div>
         </>
-     );
-}
- 
+    );
+};
+
 export default Header;
