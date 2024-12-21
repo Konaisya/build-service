@@ -12,11 +12,11 @@
     z-index: 1000; 
     top: 50%;
     transition: margin-left 0.3s ease;
-    font-size: 24px;
+    font-size: 28px;
 }
 .button-span{
     color: rgb(94, 110, 255);
-    font-size: 24px;
+    font-size: 28px;
     transition: color 0.8s ease;
 }
 

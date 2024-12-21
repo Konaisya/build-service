@@ -90,6 +90,16 @@ export const apartments: Apartment[] = [
         area: 80,
         price: 75000,
         houseId: 1 
+    },
+    {
+        id: 3,
+        name: "Квартира 3",
+        description: "Luxurious and spacious",
+        image: "#",
+        rooms: 4,
+        area: 150,
+        price: 150000,
+        houseId: 1
     }
 ];
 

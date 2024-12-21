@@ -2,9 +2,9 @@ import { apartments, card_service } from "@/components/ui/cardService";
 import Image from "next/image";
 import React from "react";
 
-const ServiceDetails = async ({ params }: { params: { id: string } }) => {
-    const { id } = await params;
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+const ServiceDetails =  ({ params }: { params: { id: string } }) => {
+    const { id } =  params;
+    new Promise((resolve) => setTimeout(resolve, 1000));
     const houseId = parseInt(id, 10);
     const house = card_service.find((house) => house.id === houseId); 
     const filteredApartments = apartments.filter((apartment) => apartment.houseId === houseId);
@@ -16,6 +16,10 @@ const ServiceDetails = async ({ params }: { params: { id: string } }) => {
             </div>
         );
     }
+
+    const roomCounts = filteredApartments.map(apartment => apartment.rooms);
+    const minRooms = Math.min(...roomCounts);
+    const maxRooms = Math.max(...roomCounts);
 
     return (
         <div style={{ textAlign: "center" }}>
@@ -35,6 +39,8 @@ const ServiceDetails = async ({ params }: { params: { id: string } }) => {
             <p>{house.description}</p>
             <p>Этажей: {house.floors}</p>
             <p>Статус: {getStatusName(house.statusId)}</p>
+            <p>Минимальное количество комнат: {minRooms}</p>
+            <p>Максимальное количество комнат: {maxRooms}</p>
             
             {filteredApartments.length > 0 ? (
                 <ul>
@@ -71,10 +77,11 @@ const getStatusName = (statusId?: number) => {
     }
 };
 
-const ServiceDetailsWithLoading = async (props: { params: { id: string } }) => {
+const ServiceDetailsWithLoading = async (props: { params: Promise<{ id: string }> }) => {
+    const resolvedProps = await props.params;
     return (
         <React.Suspense fallback={<div>Загрузка данных...</div>}>
-            <ServiceDetails {...props} />
+            <ServiceDetails params={resolvedProps} />
         </React.Suspense>
     );
 };
