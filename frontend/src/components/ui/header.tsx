@@ -11,7 +11,7 @@ const Header = () => {
     };
 
     return (
-        <>
+        <div className='all-header'>
             <div className={`burger-button ${isSidebarOpen ? 'sidebar-open' : ''}`}>
                 <button className="burger-button" onClick={toggleSidebar}><span className='button-span'>Н</span>авигация</button>
             </div>
@@ -23,7 +23,7 @@ const Header = () => {
                     <li><Link href='#' className='headerLink'>Профиль</Link></li>
                 </ul>
             </div>
-        </>
+        </div>
     );
 };
 

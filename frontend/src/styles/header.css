@@ -1,3 +1,8 @@
+.all-header{
+    position: sticky;
+    top: 0;
+}
+
 .burger-button {
     position: fixed; 
     background: none;
@@ -29,7 +34,14 @@
     transition: color 0.8s ease;
 }
 
+.sidebar-open .burger-button{
+    backdrop-filter: blur(16px);
+    border-radius: 0 8px 8px 0;
+    background-color:#00d9ff4d;
+}
+
 .sidebar {
+    top: 0;
     position: fixed;
     left: -500px; 
     width: 500px;
