@@ -3,7 +3,7 @@
     align-items: center;
     justify-content: center;
     text-align: center;
-    height: 90vh;
+    height: 100vh;
   }
 
   .main-header-h1{
@@ -16,12 +16,3 @@
     margin-top: 8px;
     width: 600px;
   }
-  .main-border {
-    padding: 20px;
-    margin-top: 20px; 
-    background-color: #2270ff3d;; 
-    border-radius: 10px; 
-    overflow: hidden; 
-    width: 50%;
-  }
-  
