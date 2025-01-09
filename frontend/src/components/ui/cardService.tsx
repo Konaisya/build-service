@@ -1,7 +1,7 @@
 import "@/styles/cardService.css";
 import { Button } from "./button";
 import Link from "next/link";
-
+import Image from "next/image";
 
 export const statuses: Status[] = [
     { id: 1, name: "Available" },
@@ -44,7 +44,7 @@ export const bathroomStatuses: BathroomStatus[] = [
     { id: 2, name: "Separate" }   
 ];
 
-type Apartment = {
+export type Apartment = {
     id: number;
     name: string;
     description: string;
@@ -54,15 +54,12 @@ type Apartment = {
     price: number;
     houseId?: number; 
     id_balcony?: {
-        // id: number;
         balcony_status: BalconyStatus;
     }
     id_bathrooms?: {
-        // id: number;
         bathroom_status: BathroomStatus; 
     }
 };
-
 
 export const apartments: Apartment[] = [
     {
@@ -100,6 +97,16 @@ export const apartments: Apartment[] = [
         area: 150,
         price: 150000,
         houseId: 1
+    },
+    {
+        id: 4,
+        name: "Квартира 4",
+        description: "Luxurious and spacious",
+        image: "#",
+        rooms: 4,
+        area: 150,
+        price: 150000,
+        houseId: 1
     }
 ];
 
@@ -117,7 +124,7 @@ export const card_service: Houses[] = [
         id: 2,
         title: "Card 2",
         description: "This is card 2",
-        images: ["https://picsum.photos/200/300"],
+        images: ["apart.jpg"],
         floors: 10,
         statusId: 1, 
         apartments: [] 
@@ -126,7 +133,7 @@ export const card_service: Houses[] = [
         id: 3,
         title: "Card 3",
         description: "This is card 3",
-        images: ["https://picsum.photos/200/300"],
+        images: ["apart.jpg"],
         floors: 8,
         statusId: 2 
     }
@@ -137,11 +144,17 @@ const CardService = () => {
         <div className="card-container">
             {card_service.map((card) => (
                 <div className="card" key={card.id}>
-                    <img src={card.images[0]} alt={card.title} className="card-image" />
+                    <Image 
+                        width={400} 
+                        height={400} 
+                        src={card.images[0].startsWith('http') ? card.images[0] : `/${card.images[0]}`} 
+                        alt={card.title} 
+                        className="card-image" 
+                    />
                     <div className="card-content">
                         <h3 className="card-title">{card.title}</h3>
                         <p className="card-description">{card.description}</p>
-                        <Link href={`/services/${card.id}`}>
+                        <Link href={`/services/${card.id}`} prefetch={true}>
                             <Button className="card-button">Подробнее</Button>
                         </Link>
                     </div>

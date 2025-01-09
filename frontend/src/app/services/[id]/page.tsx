@@ -1,9 +1,8 @@
-import { apartments, card_service } from "@/components/ui/cardService"; 
+import { apartments, card_service, Apartment } from "@/components/ui/cardService"; 
 import Image from "next/image";
 import React from "react";
-
-const ServiceDetails =  ({ params }: { params: { id: string } }) => {
-    const { id } =  params;
+const ServiceDetails = ({ params }: { params: { id: string } }) => {
+    const { id } = params;
     new Promise((resolve) => setTimeout(resolve, 1000));
     const houseId = parseInt(id, 10);
     const house = card_service.find((house) => house.id === houseId); 
@@ -18,8 +17,34 @@ const ServiceDetails =  ({ params }: { params: { id: string } }) => {
     }
 
     const roomCounts = filteredApartments.map(apartment => apartment.rooms);
-    const minRooms = Math.min(...roomCounts);
-    const maxRooms = Math.max(...roomCounts);
+    const minRooms = roomCounts.length > 0 ? Math.min(...roomCounts) : null;
+    const maxRooms = roomCounts.length > 0 ? Math.max(...roomCounts) : null;
+
+    // Функция для группировки квартир по характеристикам
+    const groupApartments = (apartments: Apartment[]): (Apartment & { names: string[] })[] => {
+        const grouped = apartments.reduce((acc, apartment) => {
+            const key = JSON.stringify({
+                description: apartment.description,
+                rooms: apartment.rooms,
+                area: apartment.area,
+                price: apartment.price,
+                id_bathrooms: apartment.id_bathrooms ? apartment.id_bathrooms.bathroom_status.name : null,
+                id_balcony: apartment.id_balcony ? apartment.id_balcony.balcony_status.name : null
+            });
+
+            if (!acc[key]) {
+                acc[key] = { ...apartment, names: [apartment.name] };
+            } else {
+                acc[key].names.push(apartment.name);
+            }
+            return acc;
+        }, {} as { [key: string]: Apartment & { names: string[] } });
+
+        return Object.values(grouped);
+    };
+
+    const groupedApartments = groupApartments(filteredApartments);
+
 
     return (
         <div style={{ textAlign: "center" }}>
@@ -30,24 +55,29 @@ const ServiceDetails =  ({ params }: { params: { id: string } }) => {
                         key={index} 
                         src={`/${image}`} 
                         alt={house.title} 
-                        width={500} 
-                        height={500} 
                         style={{ margin: "10px" }}
+                        width={400}
+                        height={400}
                     />
                 ))}
             </div>
             <p>{house.description}</p>
             <p>Этажей: {house.floors}</p>
             <p>Статус: {getStatusName(house.statusId)}</p>
-            <p>Минимальное количество комнат: {minRooms}</p>
-            <p>Максимальное количество комнат: {maxRooms}</p>
-            
-            {filteredApartments.length > 0 ? (
+
+            {filteredApartments.length > 0 && (
+                <>
+                    <p>Минимальное количество комнат: {minRooms}</p>
+                    <p>Максимальное количество комнат: {maxRooms}</p>
+                </>
+            )}
+
+            {groupedApartments.length > 0 ? (
                 <ul>
                     <h2>Квартиры в этом доме:</h2>
-                    {filteredApartments.map((apartment) => (
-                        <li style={{ border: "1px solid #ccc", padding: "10px", marginBottom: "10px"}} key={apartment.id}> 
-                            <h3>{apartment.name}</h3>
+                    {groupedApartments.map((apartment) => (
+                        <li style={{ border: "1px solid #ccc", padding: "10px", marginBottom: "10px"}} key={apartment.names.join(',')}> 
+                            <h3>{apartment.names.join(', ')}</h3>
                             <p>{apartment.description}</p>
                             <p>Комнаты: {apartment.rooms}</p>
                             <p>Площадь: {apartment.area} м²</p>
