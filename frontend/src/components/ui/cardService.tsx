@@ -14,9 +14,10 @@ type Houses = {
     title: string;
     description: string;
     images: string[];
+    district:string;
     floors?: number;
     statusId?: number; 
-    apartments?: number[]; 
+    apartments?: number[];
 };
 
 type Status = {
@@ -34,6 +35,11 @@ type BalconyStatus = {
     name: string;
 }
 
+type CategoryApartment = {
+    id: number;
+    name: string;
+}
+
 export const balconyStatuses: BalconyStatus[] = [
     { id: 1, name: "Yes" }, 
     { id: 2, name: "No" }
@@ -44,6 +50,12 @@ export const bathroomStatuses: BathroomStatus[] = [
     { id: 2, name: "Separate" }   
 ];
 
+export const categoryApartment: CategoryApartment[] = [
+    { id: 1, name: "Люкс" },
+    { id: 2, name: "Средний класс" },
+    { id: 3, name: "Эконом" }
+];
+
 export type Apartment = {
     id: number;
     name: string;
@@ -51,7 +63,10 @@ export type Apartment = {
     image: string;
     rooms: number;
     area: number;
-    price: number;
+    count?: number;
+    id_category?: {
+        categoryApartment: CategoryApartment;
+    }
     houseId?: number; 
     id_balcony?: {
         balcony_status: BalconyStatus;
@@ -64,12 +79,15 @@ export type Apartment = {
 export const apartments: Apartment[] = [
     {
         id: 1,
-        name: "Квартира 1",
+        name: "Квартиры люкс класса",
         description: "Spacious apartment with a great view",
         image: "apartment1.jpg",
-        rooms: 3,
+        rooms: 4,
         area: 120,
-        price: 100000,
+        count: 10,
+        id_category: {
+            categoryApartment: categoryApartment[0]
+        },
         id_balcony: {
             balcony_status: balconyStatuses[0]
         },
@@ -80,32 +98,28 @@ export const apartments: Apartment[] = [
     },
     {
         id: 2,
-        name: "Квартира 2",
+        name: "Квартиры среднего класса",
         description: "Cozy and affordable",
         image: "apartment2.jpg",
+        id_category: {
+            categoryApartment: categoryApartment[1]
+        },
         rooms: 2,
-        area: 80,
-        price: 75000,
+        count: 30,
+        area: 100,
         houseId: 1 
     },
     {
         id: 3,
-        name: "Квартира 3",
+        name: "Квартиры эконом класса",
         description: "Luxurious and spacious",
         image: "#",
+        id_category: {
+            categoryApartment: categoryApartment[2]
+        },
+        count: 50,
         rooms: 4,
-        area: 150,
-        price: 150000,
-        houseId: 1
-    },
-    {
-        id: 4,
-        name: "Квартира 4",
-        description: "Luxurious and spacious",
-        image: "#",
-        rooms: 4,
-        area: 150,
-        price: 150000,
+        area: 70,
         houseId: 1
     }
 ];
@@ -114,6 +128,7 @@ export const card_service: Houses[] = [
     {
         id: 1,
         title: "Хрущевка",
+        district:"Ленинский",
         description: "В этом доме ебашут дрелью тебе в ухо уебан, ты будешь страдать ведь кроме дрели тут еще и дети есть за стеной, весело тебе будет",
         images: ["house.jpg", "apart.jpg"],
         floors: 5,
@@ -123,6 +138,7 @@ export const card_service: Houses[] = [
     {
         id: 2,
         title: "Card 2",
+        district:"Кировский",
         description: "This is card 2",
         images: ["apart.jpg"],
         floors: 10,
@@ -132,6 +148,7 @@ export const card_service: Houses[] = [
     {
         id: 3,
         title: "Card 3",
+        district:"Куйбышевский",
         description: "This is card 3",
         images: ["apart.jpg"],
         floors: 8,
@@ -142,6 +159,12 @@ export const card_service: Houses[] = [
 const CardService = () => {
     return (
         <div className="card-container">
+            <div className="card order-card">
+                <div className="order-card-content">
+                    <h3 className="order-card-title">Заказать услугу</h3>
+                    <button className="order-button">+</button>
+                </div>
+            </div>
             {card_service.map((card) => (
                 <div className="card" key={card.id}>
                     <Image 
