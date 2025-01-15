@@ -1,3 +1,4 @@
+/* main.css */
 .main-header {
     display: flex;
     align-items: center;
@@ -16,3 +17,26 @@
     margin-top: 8px;
     width: 600px;
   }
+
+  .dots {
+    display: flex;
+    justify-content: center;
+    margin-top: 50px; 
+  }
+  .slide-dot {
+    display: block;
+    width: 10px;
+    height: 10px; 
+    border-radius: 50%; 
+    background-color: gray; 
+    margin: 0 5px;
+    cursor: pointer; 
+    opacity: 0.7; 
+    transition: background-color 0.3s; 
+    margin-top: 48px;
+  }
+  
+  .slide-dot.active {
+    background-color: blue; 
+  }
+

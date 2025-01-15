@@ -1,19 +1,41 @@
-"use client";
-import { useState } from 'react';
-import "@/styles/header.css";
-import Link from 'next/link';
+'use client'
+import React, { useState } from 'react';
+import Link from 'next/link'; // Предполагается, что вы используете Next.js для маршрутизации
+import '@/styles/header.css'; // Импортируйте ваш CSS файл для стилей
 
-const Header = () => {
+const Header: React.FC = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
     };
 
+    const closeSidebar = () => {
+        setIsSidebarOpen(false);
+    };
+
+    const handleClickOutside = (event: MouseEvent) => {
+        const sidebar = document.querySelector('.sidebar') as HTMLElement;
+        const burgerButton = document.querySelector('.burger-button') as HTMLElement;
+
+        if (sidebar && !sidebar.contains(event.target as Node) && !burgerButton?.contains(event.target as Node)) {
+            closeSidebar();
+        }
+    };
+
+    React.useEffect(() => {
+        document.addEventListener('click', handleClickOutside);
+        return () => {
+            document.removeEventListener('click', handleClickOutside);
+        };
+    }, []);
+
     return (
         <div className='all-header'>
             <div className={`burger-button ${isSidebarOpen ? 'sidebar-open' : ''}`}>
-                <button className="burger-button" onClick={toggleSidebar}><span className='button-span'>Н</span>авигация</button>
+                <button className="burger-button" onClick={toggleSidebar}>
+                    <span className='button-span'>Н</span>авигация
+                </button>
             </div>
             <div className={`sidebar ${isSidebarOpen ? 'show' : ''}`}>
                 <ul>
