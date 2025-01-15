@@ -1,0 +1,11 @@
+.button-back{
+    right: 16px;
+    top: 16px;
+    position: absolute;
+    background-color: #3019ff;
+    transition: background-color 0.2s ease;
+    
+    &:hover{
+        background-color: #08004d;
+    }
+}

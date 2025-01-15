@@ -1,5 +1,8 @@
+import { Button } from "@/components/ui/button";
 import { apartments, card_service, Apartment } from "@/components/ui/cardService"; 
+import "./style.css"
 import Image from "next/image";
+import Link from "next/link";
 import React from "react";
 const ServiceDetails = ({ params }: { params: { id: string } }) => {
     const { id } = params;
@@ -20,14 +23,12 @@ const ServiceDetails = ({ params }: { params: { id: string } }) => {
     const minRooms = roomCounts.length > 0 ? Math.min(...roomCounts) : null;
     const maxRooms = roomCounts.length > 0 ? Math.max(...roomCounts) : null;
 
-    // Функция для группировки квартир по характеристикам
     const groupApartments = (apartments: Apartment[]): (Apartment & { names: string[] })[] => {
         const grouped = apartments.reduce((acc, apartment) => {
             const key = JSON.stringify({
                 description: apartment.description,
                 rooms: apartment.rooms,
                 area: apartment.area,
-                price: apartment.price,
                 id_bathrooms: apartment.id_bathrooms ? apartment.id_bathrooms.bathroom_status.name : null,
                 id_balcony: apartment.id_balcony ? apartment.id_balcony.balcony_status.name : null
             });
@@ -47,6 +48,8 @@ const ServiceDetails = ({ params }: { params: { id: string } }) => {
 
 
     return (
+        <>
+        <Link href={"/services"}><Button className="button-back">Назад</Button></Link>
         <div style={{ textAlign: "center" }}>
             <h1>Детали дома: {house.title}</h1>
             <div style={{ display: "flex", justifyContent: "center", flexWrap: "wrap" }}>
@@ -79,9 +82,11 @@ const ServiceDetails = ({ params }: { params: { id: string } }) => {
                         <li style={{ border: "1px solid #ccc", padding: "10px", marginBottom: "10px"}} key={apartment.names.join(',')}> 
                             <h3>{apartment.names.join(', ')}</h3>
                             <p>{apartment.description}</p>
+                            <p>Категория квартир: {apartment.id_category?.categoryApartment.name}</p>
                             <p>Комнаты: {apartment.rooms}</p>
                             <p>Площадь: {apartment.area} м²</p>
-                            <p>Цена: ${apartment.price}</p>
+                            <p>Их количество: {apartment.count} шт.</p>
+                            
                             <p>Ванная комната: {apartment.id_bathrooms ? apartment.id_bathrooms.bathroom_status.name : "Нет информации"}</p>
                             <p>Балкон: {apartment.id_balcony ? apartment.id_balcony.balcony_status.name : "Нет информации"}</p>
                         </li>
@@ -91,6 +96,7 @@ const ServiceDetails = ({ params }: { params: { id: string } }) => {
                 <p>Нет доступных квартир в этом доме.</p>
             )}
         </div>
+        </>
     );
 };
 

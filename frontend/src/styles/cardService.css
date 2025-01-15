@@ -83,3 +83,53 @@
         background-color: rgb(74, 77, 248);
     }
 }
+
+
+.order-card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(48, 25, 255, 0.1); 
+    border-radius: 16px;
+    padding: 24px;
+    height: 290px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    position: relative;
+    cursor: pointer;
+    width: 1150px;
+    max-width: 1200px;
+}
+
+.order-card-content {
+    text-align: center;
+    width: 400px;
+    margin: 0 auto;
+}
+
+.order-card-title {
+    font-size: 32px;
+    font-weight: 600;
+    color: #2b2b2b;
+    margin-bottom: 16px;
+}
+
+.order-button {
+    font-size: 56px;
+    font-weight: bold;
+    color: white;
+    background-color: rgb(48, 25, 255);
+    border: none;
+    border-radius: 50%;
+    width: 90px;
+    height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s ease;
+    cursor: pointer;
+    margin: 0 auto;
+}
+
+.order-button:hover {
+    background-color: rgb(74, 77, 248); 
+}
