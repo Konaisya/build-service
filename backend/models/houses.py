@@ -1,6 +1,8 @@
 from config.database import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import Integer, String, Text, DECIMAL, ForeignKey
+from models.apartments import Apartment
+from models.orders import Order
 
 class House(Base):
     __tablename__ = 'houses'
