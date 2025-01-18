@@ -1,6 +1,7 @@
 from config.database import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import Integer, String
+from models.orders import Order
 
 class User(Base):
     __tablename__ = 'users'
