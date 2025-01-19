@@ -4,8 +4,103 @@
     position: absolute;
     background-color: #3019ff;
     transition: background-color 0.2s ease;
+    position: fixed;
     
     &:hover{
         background-color: #08004d;
     }
 }
+
+.apartments-list-item {
+    background-color: #89d4ff;
+    display: flex;
+    max-width: 1200px;
+    align-items: flex-start;
+    margin: 0 auto;
+    padding: 16px;
+    border-radius: 8px; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+    margin-bottom: 80px;
+    position: relative;
+}
+
+.apartments-list-image {
+    width: 350px; 
+    height: 300px;
+    object-fit: cover; 
+    border-radius: 8px;
+    margin-right: 16px;
+}
+
+.apartments-list-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.apartments-list-h3 {
+    text-align: left;
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0 0 8px 0;
+}
+
+.apartments-list-desk{
+    text-align: left;
+    margin: 4px 0; 
+}
+
+.button-open-apartment {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    background-color: #00a2ff;
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    color:black; 
+    font-weight: bold;
+
+    &:hover {
+        color: white;
+        background-color: #0056b3;
+    }
+}
+
+
+.appartments-nav-button{
+    position: fixed;
+    top: 50%;
+    right: 16px;
+    transform: translateY(-50%);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    width: 200px;
+}
+
+.apartments-list-item {
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .apartments-list-item.highlighted {
+    box-shadow: 0 16px 40px rgba(0, 204, 255, 0.795);
+    transform: translateY(-5px);
+  }
+  
+  .apartment-button {
+    position: sticky;
+    transition: all 0.3s ease-in-out;
+    background-color: #0056b3;
+  }
+  
+  .apartment-button:hover {
+    background-color: #003874;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }

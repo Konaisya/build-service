@@ -1,7 +1,7 @@
 'use client'
 import React, { useState } from 'react';
-import Link from 'next/link'; // Предполагается, что вы используете Next.js для маршрутизации
-import '@/styles/header.css'; // Импортируйте ваш CSS файл для стилей
+import Link from 'next/link'; 
+import '@/styles/header.css'; 
 
 const Header: React.FC = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
