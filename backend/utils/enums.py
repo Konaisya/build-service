@@ -37,25 +37,3 @@ class HouseStatus(Enum):
     CONSTRUCT_FOR_ORDER = 'CONSTRUCT_FOR_ORDER'
     FOR_SALE = 'FOR_SALE'
     SOLD = 'SOLD'
-
-class ApartmentParametersStatus(Enum):
-    NO_BALCONY = "NO"
-    ONE_BALCONY = "1"
-    TWO_BALCONY = "2"
-    SEPARATE_BATHROOM = "SEPARATE"
-    COMBINED_BATHROOM = "COMBINED"
-
-class HouseAdditionsStatus(Enum):
-    PARCKING_YES = "YES"
-    PARCKING_NO = "NO"
-    PLAYGROUND_YES = "YES"
-    PLAYGROUND_NO = "NO"
-    BASEMENT_YES = "YES"
-    BASEMENT_NO = "NO"
-    GREEN_ZONE_YES = "YES"
-    GREEN_ZONE_NO = "NO"
-    CARGO_ELEVATOR = "CARGO"
-    PASSENGER_ELEVATOR = "PASSENGER"
-    
-
-

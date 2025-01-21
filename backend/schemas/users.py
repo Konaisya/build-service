@@ -34,7 +34,7 @@ class UserCreate(BaseModel):
 class UserUpdate(BaseModel):
     name: Optional[str] = None
     org_name: Optional[str] = None
-    role: Optional[str] = None
+    role: Optional[Roles] = None
     email: Optional[str] = None
     password: Optional[str] = None
 
@@ -81,6 +81,6 @@ class User(BaseModel):
     id: int
     name: str
     org_name: Optional[str]
-    role: str
+    role: Roles
     email: str
     password: str
