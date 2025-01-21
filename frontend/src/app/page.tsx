@@ -4,28 +4,38 @@ import "@/styles/main.css";
 import { useRef, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 type Slide = {
   src: string;
   title: string;
   description: string;
+  url: string;
+  name: string;
 };
 
 const images: Slide[] = [
   {
     src: "/house.jpg",
-    title: "Строим будущее",
-    description: "Надежные решения для вас.",
+    title: "Мы cтроим будущее",
+    description: "Надежные решения для вас и вашей семьи.",
+    url: "/services",
+    name: "Услуги",
   },
   {
     src: "/apart.jpg",
-    title: "Качество и инновации",
-    description: "Мы обеспечиваем высокое качество работы и современные технологии.",
+    title: "Наши успешные проекты",
+    description: "Ознакомьтесь с нашим портфолио и найдите идеальное решение для вашего будущего дома!",
+    url: "#",
+    name: "Ознакомиться",
   },
   {
     src: "/homes.jpg",
-    title: "Доверие и профессионализм",
-    description: "Работаем с полной ответственностью и профессионализмом.",
+    title: "Ваш идеальный дом ждет вас!",
+    description: "Откройте для себя современные жилые комплексы с уникальным дизайном и высококачественной отделкой - выберите свой новый дом уже сегодня!",
+    url: "#",
+    name: "Регистрация",
   },
 ];
 
@@ -96,27 +106,29 @@ export default function Home() {
     center: { opacity: 1, x: 0 }, 
     exit: { opacity: 0, x: -200 }, 
   };
+  
+  const btnVariants = {
+    enter: {opaсity: 0},
+    center: {opaсity: 1},
+    exit: {opaсity: 0},
+  }
 
   return (  
     <div onWheel={handleScroll} className="all-main" style={{ overflow: "hidden" }}>
+       <div className="main-header-img"></div>
       <div
         className="main-header"
         ref={headerRef}
-        style={{
-          height: "100vh",
-          position: "relative",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
       >
+       
         <div className="main-header-text">
           <h1 className="main-header-h1">Строим будущее</h1>
           <h1 className="main-header-h1">Надежные решения для вас</h1>
           <p className="main-header-p">
             Наша строительная компания предлагает качественные и надежные услуги
-            по возведению и ремонту жилых и коммерческих объектов.
+            по возведению жилых объектов.
           </p>
+          <Link href={"/services"}> <Button className="service-btn" >К услугам</Button></Link>
         </div>
       </div>
 
@@ -144,6 +156,7 @@ export default function Home() {
         gap: "20px",
         position: "relative",
         flexDirection: "row", 
+        maxWidth:"1300px"
       }}
     >
       <motion.div
@@ -157,6 +170,9 @@ export default function Home() {
           flex: 1,
           textAlign: "left",
           color: "#333",
+          width: "100%"
+
+
         }}
       >
         <h1 style={{ fontSize: "2rem", marginBottom: "1rem" }}>
@@ -165,6 +181,16 @@ export default function Home() {
         <p style={{ fontSize: "1rem", color: "#555" }}>
           {images[currentIndex].description}
         </p>
+      <motion.div 
+        variants={btnVariants}
+        initial="enter"
+        animate="center"
+        exit="exit"
+        >
+          <Link  href={images[currentIndex].url}>
+          <Button className="slides-btn">{images[currentIndex].name}</Button> 
+          </Link> 
+        </motion.div>
       </motion.div>
       <motion.div
         key={images[currentIndex].src}
