@@ -3,6 +3,8 @@ from datetime import datetime
 from utils.enums import OrderStatus
 from typing import Optional
 import pytz
+from schemas.users import User
+from schemas.houses import House
 
 class OrderCreate(BaseModel):
     id_user: int = Field(ge=1)
@@ -48,8 +50,8 @@ class OrderUpdate(BaseModel):
     
 class Order(BaseModel):
     id: int
-    id_user: int
-    id_house: int
+    User: User
+    House: House
     status: OrderStatus
     min_price: float
     max_price: float
