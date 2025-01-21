@@ -9,7 +9,7 @@ export const statuses: Status[] = [
     { id: 3, name: "Under Construction" },
 ];
 
-type Houses = {
+export type Houses = {
     id: number;
     title: string;
     description: string;
@@ -80,7 +80,7 @@ export const apartments: Apartment[] = [
     {
         id: 1,
         name: "Квартиры люкс класса",
-        description: "Spacious apartment with a great view",
+        description: "Spacious apartment with a great view Spacious apartment with a great viewSpacious apartment with a great viewSpacious apartment with a great viewSpacious apartment with a great viewSpacious apartment with a great viewSpacious apartment with a great viewSpacious apartment with a great view",
         image: "apartment1.jpg",
         rooms: 4,
         area: 120,
@@ -107,7 +107,7 @@ export const apartments: Apartment[] = [
         rooms: 2,
         count: 30,
         area: 100,
-        houseId: 1 
+        houseId: 2
     },
     {
         id: 3,
