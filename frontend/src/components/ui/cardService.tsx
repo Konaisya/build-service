@@ -107,7 +107,7 @@ export const apartments: Apartment[] = [
         rooms: 2,
         count: 30,
         area: 100,
-        houseId: 1 
+        houseId: 2
     },
     {
         id: 3,
