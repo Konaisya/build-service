@@ -1,7 +1,7 @@
 from utils.abstract_repository import IREpository
 from models.orders import Order
 
-class OrdersService:
+class OrderService:
     def __init__(self, model, session):
         self.model = Order
         self.session = session
