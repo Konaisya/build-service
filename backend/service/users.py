@@ -18,12 +18,6 @@ class UserService:
         user = self.user_repository.get_one_filter_by(**filter)
         return user
     
-    def create(self, data: UserCreate):
-        entity = data.model_dump()
-        if self.user_repository.get_one_filter_by(email=entity['email']):
-            raise HTTPException(status_code=400, detail={'status': AuthStatus.INVALID_EMAIL.value})
-        entity['password'] = pbkdf2_sha256.hash(data.password)
-    
     def update(self, user_id: int, data: UserUpdate):
         entity = data.model_dump()
         user = self.user_repository.get_one_filter_by(id=user_id)

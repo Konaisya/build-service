@@ -10,7 +10,7 @@ router = APIRouter()
 
 @router.post('/signup', status_code=201)
 async def signup(new_user: UserCreate, auth_service: AuthService = Depends(get_auth_service)):
-    user = auth_service.create(new_user)
+    user = auth_service.create_user(new_user)
     if not user:
         raise HTTPException(status_code=400, detail={'status': Status.FAILED.value})
     return {'status': Status.SUCCESS.value}
