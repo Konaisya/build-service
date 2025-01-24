@@ -4,9 +4,9 @@ from typing import Optional
 from utils.enums import Roles
 
 class UserCreate(BaseModel):
-    name: str
+    name: Optional[str] = None
     org_name: Optional[str] = None
-    role: Roles
+    role: Optional[Roles] = None
     email: EmailStr
     password: str
 
