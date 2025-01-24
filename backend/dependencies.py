@@ -1,5 +1,3 @@
-from service.auth import AuthService
-from service.users import UserService
 from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
 from models.users import User
@@ -10,6 +8,8 @@ from crud.users import UserRepository
 from config.database import get_session
 from config.auth import oauth2_scheme
 from utils.enums import Roles, AuthStatus
+from service.auth import AuthService
+from service.users import UserService
 
 def get_user_repository(db: Session = Depends(get_session)):
     return UserRepository(model=User, session=db)

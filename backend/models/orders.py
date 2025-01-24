@@ -2,8 +2,6 @@ from config.database import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import Integer, String, DECIMAL, ForeignKey
 from datetime import datetime
-from models.users import User
-from models.houses import House
 
 class Order(Base):
     __tablename__ = 'orders'
