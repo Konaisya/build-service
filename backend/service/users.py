@@ -11,7 +11,7 @@ class UserService:
         users = self.user_repository.get_all_filter_by(**filter)
         return users
 
-    def get_one_user_filter_by(self, **filter):
+    def get_user_filter_by(self, **filter):
         user = self.user_repository.get_one_filter_by(**filter)
         return user
 

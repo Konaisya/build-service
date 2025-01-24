@@ -4,6 +4,7 @@ from dependencies import get_auth_service, AuthService, get_current_user
 from schemas.users import UserCreate, UserLogin
 from utils.enums import Status
 from datetime import timedelta
+from pydantic import EmailStr
 
 router = APIRouter()
 
@@ -15,8 +16,8 @@ async def signup(new_user: UserCreate, auth_service: AuthService = Depends(get_a
     return {'status': Status.SUCCESS.value}
 
 @router.post('/login', status_code=200)
-async def login(name: str = Form(...), password = Form(...), auth_service: AuthService = Depends(get_auth_service)):
-    token, update_token = auth_service.login(UserLogin(name=name, password=password))
+async def login(email: EmailStr = Form(...), password = Form(...), auth_service: AuthService = Depends(get_auth_service)):
+    token, update_token = auth_service.login(UserLogin(email=email, password=password))
     response = JSONResponse(content=token)
     response.set_cookie(key='update_token', value=update_token, httponly=True, max_age=60*60*24*7)
     return response

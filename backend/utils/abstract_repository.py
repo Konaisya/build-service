@@ -28,10 +28,10 @@ class IREpository(AbstractRepository):
         self.session = session
 
     def get_all_filter_by(self, **filter):
-        return self.session.query(self.entity).filter_by(**filter).all()
+        return self.session.query(self.model).filter_by(**filter).all()
 
     def get_one_filter_by(self, **filter):
-        return self.session.query(self.entity).filter_by(filter).first()
+        return self.session.query(self.model).filter_by(**filter).first()
 
     def add(self, entity: dict):
         entity = self.model(**entity)
