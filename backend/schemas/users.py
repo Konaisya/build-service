@@ -1,21 +1,14 @@
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, EmailStr
 import re
 from typing import Optional
 from utils.enums import Roles
 
 class UserCreate(BaseModel):
-    name: str = Field(max_length=255)
+    name: str
     org_name: Optional[str] = None
-    role: Roles = Field(default=Roles.USER, max_length=255)
-    email: str = Field(max_length=255)
-    password: str = Field(max_length=32)
-    
-    @field_validator('name')
-    @classmethod
-    def name_len_validate(cls, val: str) -> str:
-        if (len(val) > 255):
-            raise ValueError('Name must be less than 255 characters')
-        return val
+    role: Roles
+    email: EmailStr
+    password: str
 
     @field_validator('email')
     @classmethod
@@ -38,13 +31,6 @@ class UserUpdate(BaseModel):
     email: Optional[str] = None
     password: Optional[str] = None
 
-    @field_validator('name')
-    @classmethod
-    def name_len_validate(cls, val: str) -> str:
-        if (len(val) > 255):
-            raise ValueError('Name must be less than 255 characters')
-        return val
-    
     @field_validator('email')
     @classmethod
     def validate_email(cls, val: str):

@@ -22,10 +22,10 @@ class Apartment(Base):
     id_house: Mapped[int] = mapped_column(ForeignKey("houses.id"))    
     count: Mapped[int] = mapped_column(Integer)
 
-    category: Mapped["ApartmentCategory"] = relationship("ApartmentCategory", back_populates="apartment", cascade="all, delete-orphan")
+    category: Mapped["ApartmentCategory"] = relationship("ApartmentCategory", back_populates="apartment")
     parameter: Mapped[list["ApartmentParameter"]] = relationship("ApartmentParameter", secondary='apartment_parameter_association', back_populates="apartment")
     house: Mapped["House"] = relationship("House", back_populates="apartment")
-    image: Mapped[list["ApartmentImage"]] = relationship("ApartmentImage", back_populates="apartment", cascade="all, delete-orphan")
+    image: Mapped[list["ApartmentImage"]] = relationship("ApartmentImage", back_populates="apartment")
 
 class ApartmentParameter(Base):
     __tablename__ = 'apartment_parameters'
@@ -34,7 +34,7 @@ class ApartmentParameter(Base):
     name: Mapped[str] = mapped_column(String(255))
     status: Mapped[str] = mapped_column(String(255))
 
-    apartment: Mapped[list["Apartment"]] = relationship("Apartment",secondary="apartment_parameter_association" , back_populates="parameter")
+    apartment: Mapped[list["Apartment"]] = relationship("Apartment",secondary="apartment_parameter_association", back_populates="parameter")
 
 class ApartmentParameterAssociation(Base):
     __tablename__ = 'apartment_parameter_association'
