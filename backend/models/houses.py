@@ -2,6 +2,7 @@ from config.database import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import Integer, String, Text, DECIMAL, ForeignKey
 
+
 class House(Base):
     __tablename__ = 'houses'
 
