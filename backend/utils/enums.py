@@ -2,7 +2,7 @@ from enum import Enum
 
 class Status(Enum):
     SUCCESS = 'SUCCESS'
-    FILLED = 'FILLED'
+    FAILED = 'FAILED'
     NOT_FOUND = 'NOT_FOUND'
     UNAUTHORIZED = 'UNAUTHORIZED'
 
