@@ -30,6 +30,13 @@ const Header: React.FC = () => {
         };
     }, []);
 
+    const [accessToken, setAccessToken] = React.useState<string | null>(null);
+
+    React.useEffect(() => {
+        const accessToken = localStorage.getItem('access_token');
+        setAccessToken(accessToken);
+    }, []);
+
     return (
         <div className='all-header'>
             <div className={`burger-button ${isSidebarOpen ? 'sidebar-open' : ''}`}>
@@ -42,7 +49,12 @@ const Header: React.FC = () => {
                     <li><Link href='/' className='headerLink'>Главная</Link></li>
                     <li><Link href='/services' className='headerLink'>Услуги</Link></li>
                     <li><Link href='#' className='headerLink'>О нас</Link></li>
-                    <li><Link href='#' className='headerLink'>Профиль</Link></li>
+                    {accessToken ? (
+                        <li><Link href='#' className='headerLink'>Профиль</Link></li>
+                    ) : (
+                        <li><Link href='/auth' className='headerLink'>Войти</Link></li>
+                    )}
+                    
                 </ul>
             </div>
         </div>

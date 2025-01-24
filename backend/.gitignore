@@ -1,4 +1,4 @@
 /.env
 /create_database.py
 */__pycache__/
-
+venv/
