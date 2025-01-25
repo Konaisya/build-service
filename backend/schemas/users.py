@@ -28,7 +28,7 @@ class UserUpdate(BaseModel):
     name: Optional[str] = None
     org_name: Optional[str] = None
     role: Optional[Roles] = None
-    email: Optional[str] = None
+    email: Optional[EmailStr] = None
     password: Optional[str] = None
 
     @field_validator('email')
@@ -43,7 +43,7 @@ class UserUpdate(BaseModel):
     def validate_password(cls, val: str):
         if not re.match(r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$', val):
             raise ValueError('Invalid password')
-        return
+        return val
     
 class UserLogin(BaseModel):
     email: EmailStr
@@ -70,3 +70,9 @@ class User(BaseModel):
     role: Roles
     email: str
     password: str
+
+class UserResponse(BaseModel):
+    id: int
+    name: str
+    org_name: Optional[str] = None
+    email: str

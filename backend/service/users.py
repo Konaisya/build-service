@@ -2,9 +2,10 @@ from utils.enums import Roles, AuthStatus
 from fastapi import HTTPException
 from passlib.hash import pbkdf2_sha256
 from schemas.users import UserCreate, UserUpdate
+from crud.users import UserRepository
 
 class UserService:
-    def __init__(self, user_repository):
+    def __init__(self, user_repository: UserRepository):
         self.user_repository = user_repository
 
     def get_all_users_filter_by(self, **filter):
@@ -15,14 +16,9 @@ class UserService:
         user = self.user_repository.get_one_filter_by(**filter)
         return user
 
-    def create(self, data: UserCreate):
-        from crud.users import UserRepository
-        entity = data.model_dump()
-        if self.user_repository.get_one_filter_by(email=entity['email']):
-            raise HTTPException(status_code=400, detail={'status': AuthStatus.INVALID_EMAIL.value})
-        entity['password'] = pbkdf2_sha256.hash(data.password)
-        new_user = self.user_repository.create(entity)
-        return new_user
+    def create_user(self, user: UserCreate):
+        user.password = pbkdf2_sha256.hash(user.password)
+        return self.user_repository.add(user.model_dump())
 
     def update(self, user_id: int, data: UserUpdate):
         entity = data.model_dump()
@@ -31,8 +27,9 @@ class UserService:
             raise HTTPException(status_code=403, detail={'status': AuthStatus.INVALID_PASSWORD.value})
         if data.password:
             entity['password'] = pbkdf2_sha256.hash(data.password)
-        updated_user = self.user_repository.update(user_id, entity)
+        self.user_repository.update(user_id, entity)
+        updated_user = self.user_repository.get_one_filter_by(id=user_id)
         return updated_user
 
-    def delete(self, user_id: int):
+    def delete_user(self, user_id: int):
         return self.user_repository.delete(user_id)
