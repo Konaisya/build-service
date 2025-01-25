@@ -46,7 +46,7 @@ class UserUpdate(BaseModel):
         return
     
 class UserLogin(BaseModel):
-    email: str
+    email: EmailStr
     password: str
     
     @field_validator('email')
