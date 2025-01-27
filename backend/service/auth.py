@@ -44,7 +44,7 @@ class AuthService:
         return jwt.encode(payload, SECRET_KEY, algorithm='HS256')
     
     def login(self, user_login: UserLogin):
-        user = self.get_user_filter_by(username=user_login.username)
+        user = self.get_user_filter_by(email=user_login.email)
         if not user:
             raise HTTPException(status_code=401, detail={'status': AuthStatus.INVALID_EMAIL_OR_PASSWORD.value})
         if not pbkdf2_sha256.verify(user_login.password, user.password):
