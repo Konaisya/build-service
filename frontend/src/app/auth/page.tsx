@@ -5,8 +5,8 @@ import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import React, { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { useRouter } from "next/router"
-import axios from "axios"
+import { useRouter } from "next/navigation"
+import { useLogin } from '@/hooks/use-login' 
 
 const Auth = () => {
     const [isLogin, setIsLogin] = useState(true)
@@ -15,75 +15,57 @@ const Auth = () => {
     const [password, setPassword] = useState("")
     const [orgName, setOrgName] = useState("")
     const [errorMessage, setErrorMessage] = useState("")
-    const [loading, setLoading] = useState(false)
-    const router = useRouter()
+    const { handleLogin, loading, error, token } = useLogin(); // Используем наш хук
+
     const toggleAuthMode = () => {
         setIsLogin(!isLogin)
         setErrorMessage("") 
     }
-    const handleLogin = async () => {
+
+    const handleLoginClick = async () => {
         if (!email || !password) {
             console.error("Пожалуйста, заполните все поля.");
             return;
         }
         
         try {
-            const formData = new FormData();
-            formData.append('email', email);
-            formData.append('password', password);
-
-            const response = await axios.post(
-                'http://localhost:8000/api/auth/login',
-                formData,
-                {
-                    headers: {
-                        'Content-Type': 'multipart/form-data', 
-                    },
-                }
-            );
-            localStorage.setItem('access_token', response.data.access_token);
-            console.log("Успешный вход!");
-            router.push('/profile');
+            await handleLogin(email, password);
         } catch (error) {
-            if (axios.isAxiosError(error)) {
-                console.error('Ошибка при входе:', error.response?.data || error.message);
-            } else {
-                console.error('Непредвиденная ошибка:', error);
-            }
+            console.error('Ошибка при входе:', error);
         }
     };
 
-    const handleRegister = async () => {
-        setLoading(true);
-        setErrorMessage("");
-        try {
-            const response = await axios.post<{ access_token: string }>(
-                'http://localhost:8000/api/auth/signup',
-                {
-                    name,
-                    email,
-                    password,
-                    org_name: orgName,
-                },
-                {
-                    headers: { 'Content-Type': 'application/json' },
-                }
-            );
-            localStorage.setItem('access_token', response.data.access_token);
-            console.log("Успешная регистрация!");
-        } catch (error: unknown) {
-            if (axios.isAxiosError(error) && error.response) {
-                setErrorMessage(
-                    error.response.data?.detail || "Ошибка при регистрации. Проверьте данные и попробуйте снова."
-                );
-            } else {
-                setErrorMessage("Непредвиденная ошибка. Попробуйте снова.");
-            }
-            console.error("Ошибка при регистрации:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    // const handleRegister = async () => {
+    //     setLoading(true);
+    //     setErrorMessage("");
+    //     try {
+    //         const response = await axios.post<{ access_token: string }>(
+    //             'http://localhost:8000/api/auth/signup',
+    //             {
+    //                 name,
+    //                 email,
+    //                 password,
+    //                 org_name: orgName,
+    //             },
+    //             {
+    //                 headers: { 'Content-Type': 'application/json' },
+    //             }
+    //         );
+    //         localStorage.setItem('access_token', response.data.access_token);
+    //         console.log("Успешная регистрация!");
+    //     } catch (error: unknown) {
+    //         if (axios.isAxiosError(error) && error.response) {
+    //             setErrorMessage(
+    //                 error.response.data?.detail || "Ошибка при регистрации. Проверьте данные и попробуйте снова."
+    //             );
+    //         } else {
+    //             setErrorMessage("Непредвиденная ошибка. Попробуйте снова.");
+    //         }
+    //         console.error("Ошибка при регистрации:", error);
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
 
     return (
         <div className="all-auth" style={{ position: 'relative'}}>
@@ -103,6 +85,7 @@ const Auth = () => {
                         </div>
                         <div className="auth-content">
                             {errorMessage && <p className="auth-error">{errorMessage}</p>}
+                            {error && <p className="auth-error">{error}</p>}
                             <div className="auth-input">
                                 <Label htmlFor="email">Email</Label>
                                 <Input 
@@ -121,7 +104,7 @@ const Auth = () => {
                                     onChange={(e) => setPassword(e.target.value)}
                                 />
                             </div>
-                            <Button onClick={handleLogin} className="auth-button" disabled={loading}>
+                            <Button onClick={handleLoginClick} className="auth-button" disabled={loading}>
                                 {loading ? "Вход..." : "Войти"}
                             </Button>
                             <Button onClick={toggleAuthMode} className="auth-button">Нет аккаунта?</Button>
@@ -178,9 +161,9 @@ const Auth = () => {
                                     onChange={(e) => setPassword(e.target.value)}
                                 />
                             </div>
-                            <Button onClick={handleRegister} className="auth-button" disabled={loading}>
+                            {/* <Button onClick={handleRegister} className="auth-button" disabled={loading}>
                                 {loading ? "Регистрация..." : "Зарегистрироваться"}
-                            </Button>
+                            </Button> */}
                             <Button onClick={toggleAuthMode} className="auth-button">Уже есть аккаунт?</Button>
                         </div>
                     </motion.div>
