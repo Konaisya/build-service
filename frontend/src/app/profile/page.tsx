@@ -12,13 +12,12 @@ import {
     DialogTitle,
     DialogTrigger,
   } from "@/components/ui/dialog"
+  import axios from "axios";
+  import {API_USER} from '@/config/apiConfig'
+  import { useRouter } from "next/navigation";
   
 
-type UserInfo = {
-    id: number;
-    name: string;
-    org_name: string;
-}
+
 
 //  type Orders = {
 //     id : number,
@@ -137,14 +136,13 @@ export const houses: Houses[] = [
     }
 ];
 
-const profile: UserInfo[] = [ {
-    id: 1,
-    name: "mamut rahal",
-    org_name: "DDXC"
 
+type Profile = {
+    id: number;
+    email?:string;
+    name: string;
+    org_name: string;
 }
-];
-
 
 
 const Profile = () => {
@@ -152,6 +150,57 @@ const headerRef = useRef<HTMLDivElement | null>(null);
 const infoRef = useRef<HTMLDivElement | null>(null);
 const [activeSection, setActiveSection] = useState<number>(0);
 const [isButtonVisible, setIsButtonVisible] = useState<boolean>(true);
+const [profile, setProfile] = useState<Profile | null>(null);
+const router = useRouter();
+
+const getProfile = async (access_token: string): Promise<Profile> => {
+    const response = await axios.get<Profile>(API_USER + "me", {
+        headers: { Authorization: `Bearer ${access_token}` },
+    });
+    return response.data;
+};
+
+useEffect(() => {
+    const access_token = localStorage.getItem("access_token");
+    if (!access_token) {
+        console.error("Токен отсутствует");
+        return;
+    }
+    axios
+        .get("http://127.0.0.1:8000/api/auth/refresh", {
+            headers: {
+                Authorization: `Bearer ${access_token}`,
+            },
+        })
+        .then((response) => setProfile(response.data))
+        .catch((error) => console.log("Ошибка:"));
+}, []);
+
+useEffect(() => {
+    const access_token = localStorage.getItem('access_token');
+    if (access_token) {
+        getProfile(access_token)
+            .then(setProfile)
+            .catch((error) => {
+                console.log("Ошибка при получении профиля:");
+                setProfile(null); 
+            });
+    }
+}, []);
+
+useEffect(()=> {
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+        window.removeEventListener('scroll', handleScroll);
+    };
+}, []);
+
+const handleLogout = () => {
+    localStorage.removeItem('access_token'); // Удаляем токен
+    setProfile(null); // Сбрасываем состояние профиля
+    router.push('/auth'); // Перенаправление на страницу входа
+};
+
 
 
 const handleNavigationClick = (index: number) => {
@@ -172,28 +221,25 @@ const handleScroll = () => {
     }
 };
 
-useEffect(() => {
-    window.addEventListener('scroll', handleScroll);
-    return () => {
-        window.removeEventListener('scroll', handleScroll);
-    };
-}, []);
+
+
+if (!profile) {
+    return <div>Загрузка...</div>; 
+}
 
 return (  
     <>
         <div className="profile-container" ref={headerRef}>
             <div className="profile-img"></div>
-            {profile.map((info) => (
-                <div className="profile-info" key={info.id}>
-                    <p>Имя пользователя: {info.name}</p>
+                <div className="profile-info" >
+                    <p>Имя пользователя: {profile.name}</p>
                     <span className="line"></span>
-                    <p>Организация: {info.org_name}</p>
-                    <Button className="exit-btn">Выйти</Button>  
+                    <p>Организация: {profile.org_name}</p>
+                    <Button onClick={handleLogout} className="exit-btn">Выйти</Button>  
                     {isButtonVisible && ( 
                         <Button onClick={() => handleNavigationClick(1)} className="move-btn">К заказам</Button>
                     )}
                 </div>
-            ))}
         </div> 
 
         <div className="order" ref={infoRef}>

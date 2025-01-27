@@ -59,7 +59,7 @@ const Header: React.FC = () => {
                 <ul>
                     <li><Link href='/' className='headerLink'>Главная</Link></li>
                     <li><Link href='/services' className='headerLink'>Услуги</Link></li>
-                    <li><Link href='#' className='headerLink'>О нас</Link></li>
+                    <li><Link href='/about' className='headerLink'>О нас</Link></li>
                     {accessToken ? (
                         <>
                             <li><Link href='/profile' className='headerLink'>Профиль</Link></li>
