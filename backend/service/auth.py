@@ -6,6 +6,9 @@ import jwt
 from config.auth import SECRET_KEY, ALGORITHM, UPDATE_EXPIRATION_TIME, EXPIRATION_TIME
 from crud.users import UserRepository
 from schemas.users import UserCreate, User, UserLogin
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class AuthService:
     def __init__(self, user_repository: UserRepository):

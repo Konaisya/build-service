@@ -39,8 +39,8 @@ class IREpository(AbstractRepository):
         self.session.commit()
         return entity
 
-    def update(self, entity: dict):
-        self.session.query(self.model).filter_by(id=entity['id']).update(entity)
+    def update(self, user_id: int, entity):
+        self.session.query(self.model).filter_by(id=user_id).update(entity)
         self.session.commit()
 
     def delete(self, id: int):
