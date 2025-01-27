@@ -46,4 +46,3 @@ class IREpository(AbstractRepository):
     def delete(self, id: int):
         self.session.query(self.model).filter_by(id=id).delete()
         self.session.commit()
-    
