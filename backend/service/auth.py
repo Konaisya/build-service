@@ -28,7 +28,8 @@ class AuthService:
     
     def decode_token(self, token):
         try:
-            payload = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
+            options = {"verify_sub": False}
+            payload = jwt.decode(token, SECRET_KEY, algorithms=['HS256'], options=options)
             return payload
         except jwt.ExpiredSignatureError:
             raise HTTPException(status_code=401, detail={'status': AuthStatus.TOKEN_EXPIRED.value})
