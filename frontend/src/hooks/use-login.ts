@@ -14,7 +14,7 @@ export const useLogin = () => {
         try {
             const data:LoginResponse = await login(email, password);
             setToken(data.access_token);
-            // router.push('/profile');
+            router.push('/profile');
             
         } catch (error) {
             setError('Invalid email or password');

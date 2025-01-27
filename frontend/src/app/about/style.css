@@ -1,0 +1,14 @@
+
+.about-main{
+    display: flex;
+    justify-content: center;  
+    align-items: center;
+    font-size: 32px;
+    height: 100vh;
+    background-color: black;
+    color: white;
+}   
+@media (prefers-color-scheme: dark) {
+    .about-main, .all-header {
+      color: #ffffff;}}
+
