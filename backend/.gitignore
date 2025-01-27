@@ -2,3 +2,4 @@
 /create_database.py
 */__pycache__/
 venv/
+/__pycache__
