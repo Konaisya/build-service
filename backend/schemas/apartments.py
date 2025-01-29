@@ -13,7 +13,7 @@ class ApartmentImageUpdate(BaseModel):
 class ApartmentImage(BaseModel):
     id: int
     image: str
-    Apartment: int
+    Apartment: Apartment
 
 
 class ApartmentCategoryCreate(BaseModel):
@@ -58,7 +58,6 @@ class ApartmentParameter(BaseModel):
 class CreateApartment(BaseModel):
     name: str = Field(max_length=255)
     description: Optional[str] = None
-    image: Optional[str] = Field(default="placeholder.png", max_length=255)
     id_category: int = Field(ge=1)
     rooms: int = Field(ge=1)
     area: float = Field(ge=0.0) 
@@ -69,12 +68,10 @@ class CreateApartment(BaseModel):
 class UpdateApartment(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None  
-    image: Optional[str] = None
     id_category: Optional[int] = None
     rooms: Optional[int] = None
     area: Optional[float] = None
     id_house: Optional[int] = None
-    parameter_ids: List[int] = Field(default_factory=list)
     count: Optional[int] = None
     
     @field_validator('name')
