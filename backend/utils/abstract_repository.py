@@ -22,6 +22,10 @@ class AbstractRepository(ABC):
     def delete(self, entity):
         pass
 
+    @abstractmethod
+    def delete__by_filter(self, **filter):
+        pass
+
 class IREpository(AbstractRepository):
     def __init__(self, model, session: Session):
         self.model = model
@@ -51,4 +55,3 @@ class IREpository(AbstractRepository):
         result = self.session.query(self.model).filter_by(**filter).delete()
         self.session.commit()
         return result > 0
-    
