@@ -1,12 +1,11 @@
 from pydantic import BaseModel, Field, field_validator, EmailStr
 import re
 from typing import Optional
-from utils.enums import Roles
 
 class UserCreate(BaseModel):
     name: Optional[str] = None
     org_name: Optional[str] = None
-    role: Optional[Roles] = None
+    role: Optional[str] = None
     email: EmailStr
     password: str
 
@@ -27,7 +26,6 @@ class UserCreate(BaseModel):
 class UserUpdate(BaseModel):
     name: Optional[str] = None
     org_name: Optional[str] = None
-    role: Optional[Roles] = None
     email: Optional[EmailStr] = None
     password: Optional[str] = None
 
@@ -67,7 +65,7 @@ class User(BaseModel):
     id: int
     name: str
     org_name: Optional[str]
-    role: Roles
+    role: str
     email: str
     password: str
 

@@ -1,10 +1,14 @@
 'use client'
-import React, { useState } from 'react';
-import Link from 'next/link'; // Предполагается, что вы используете Next.js для маршрутизации
-import '@/styles/header.css'; // Импортируйте ваш CSS файл для стилей
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link'; 
+import '@/styles/header.css'; 
+import axios from 'axios';
+import { useRouter } from 'next/navigation';
 
 const Header: React.FC = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
+    const [accessToken, setAccessToken] = useState<string | null>(null);
+    const router = useRouter();
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -23,10 +27,24 @@ const Header: React.FC = () => {
         }
     };
 
-    React.useEffect(() => {
+    useEffect(() => {
         document.addEventListener('click', handleClickOutside);
         return () => {
             document.removeEventListener('click', handleClickOutside);
+        };
+    }, []);
+
+    useEffect(() => {
+        const updateAccessToken = () => {
+            const token = localStorage.getItem('access_token');
+            setAccessToken(token);
+        };
+        updateAccessToken();
+
+        window.addEventListener('storage', updateAccessToken);
+
+        return () => {
+            window.removeEventListener('storage', updateAccessToken);
         };
     }, []);
 
@@ -41,8 +59,14 @@ const Header: React.FC = () => {
                 <ul>
                     <li><Link href='/' className='headerLink'>Главная</Link></li>
                     <li><Link href='/services' className='headerLink'>Услуги</Link></li>
-                    <li><Link href='#' className='headerLink'>О нас</Link></li>
-                    <li><Link href='#' className='headerLink'>Профиль</Link></li>
+                    <li><Link href='/about' className='headerLink'>О нас</Link></li>
+                    {accessToken ? (
+                        <>
+                            <li><Link href='/profile' className='headerLink'>Профиль</Link></li>
+                        </>
+                    ) : (
+                        <li><Link href='/auth' className='headerLink'>Войти</Link></li>
+                    )}
                 </ul>
             </div>
         </div>
