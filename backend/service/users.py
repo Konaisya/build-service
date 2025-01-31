@@ -16,10 +16,6 @@ class UserService:
         user = self.user_repository.get_one_filter_by(**filter)
         return user
 
-    def create_user(self, user: UserCreate):
-        user.password = pbkdf2_sha256.hash(user.password)
-        return self.user_repository.add(user.model_dump())
-
     def update(self, user_id: int, data: UserUpdate):
         entity = data.model_dump()
         user = self.user_repository.get_one_filter_by(id=user_id)
