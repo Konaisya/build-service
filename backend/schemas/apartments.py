@@ -1,6 +1,32 @@
 from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional
-from schemas.houses import House
+
+class ApartmentParameter(BaseModel):
+    id: int
+    name: str
+    status: str
+
+class ApartmentCategory(BaseModel): 
+    id: int
+    name: str    
+
+class ApartmentImage(BaseModel):
+    id: int
+    image: str
+    id_apartment: int
+
+class Apartment(BaseModel):
+    id: int
+    name: str
+    description: Optional[str] = None
+    category: ApartmentCategory
+    rooms: int
+    area: float
+    parameters: List[ApartmentParameter]
+    id_house: int
+    count: int
+    images: List[ApartmentImage] = []
+
 
 class ApartmentImageCreate(BaseModel):
     image: str = Field(max_length=255)
@@ -9,11 +35,6 @@ class ApartmentImageCreate(BaseModel):
 class ApartmentImageUpdate(BaseModel):
     image: Optional[str] = None
     id_apartment: Optional[int] = None
-
-class ApartmentImage(BaseModel):
-    id: int
-    image: str
-    Apartment: Apartment
 
 
 class ApartmentCategoryCreate(BaseModel):
@@ -28,10 +49,6 @@ class ApartmentCategoryUpdate(BaseModel):
         if (len(val) > 255):
             raise ValueError('Name must be less than 255 characters')
         return val
-    
-class ApartmentCategory(BaseModel):
-    id: int
-    name: str    
 
 
 class ApartmentParameterCreate(BaseModel):
@@ -48,12 +65,6 @@ class ApartmentParameterUpdate(BaseModel):
         if (len(val) > 255):
             raise ValueError('Name must be less than 255 characters')
         return val
-    
-class ApartmentParameter(BaseModel):
-    id: int
-    name: str
-    status: str
-
 
 class CreateApartment(BaseModel):
     name: str = Field(max_length=255)
@@ -115,15 +126,3 @@ class UpdateApartment(BaseModel):
         if (val < 1):
             raise ValueError("Count must be greater than 0")
         return val
-
-class Apartment(BaseModel):
-    id: int
-    name: str
-    description: Optional[str] = None
-    ApartmentCategory: ApartmentCategory
-    rooms: int
-    area: float
-    parameters: List[ApartmentParameter]
-    House: House
-    count: int
-    images: List[ApartmentImage]

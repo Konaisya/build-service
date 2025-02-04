@@ -23,7 +23,7 @@ class AbstractRepository(ABC):
         pass
 
     @abstractmethod
-    def delete__by_filter(self, **filter):
+    def delete_by_filter(self, **filter):
         pass
 
 class IREpository(AbstractRepository):
@@ -43,9 +43,11 @@ class IREpository(AbstractRepository):
         self.session.commit()
         return entity
 
-    def update(self, user_id: int, entity):
-        self.session.query(self.model).filter_by(id=user_id).update(entity)
+    def update(self, id: int, entity):
+        self.session.query(self.model).filter_by(id=id).update(entity)
         self.session.commit()
+        updated_entity = self.session.query(self.model).filter_by(id=id).first()
+        return updated_entity
 
     def delete(self, id: int):
         self.session.query(self.model).filter_by(id=id).delete()

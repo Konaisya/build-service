@@ -1,6 +1,5 @@
 from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional
-from schemas.apartments import Apartment
 from utils.enums import HouseStatus
 
 class HouseImageCreate(BaseModel):
@@ -12,7 +11,7 @@ class HouseImageUpdate(BaseModel):
     id_house: Optional[int] = None
 
 class HouseImage(BaseModel):
-    id: int
+    id: int 
     image: str
     id_house: int
 
@@ -100,8 +99,10 @@ class HouseUpdate(BaseModel):
         if (val < 0.0):
             raise ValueError("Max price must be greater than 0.0")
         return val
-    
+
 class House(BaseModel):
+    from schemas.apartments import Apartment
+
     id: int
     name: str
     description: Optional[str] = None

@@ -13,7 +13,6 @@ class House(Base):
     district: Mapped[str] = mapped_column(String(255))
     address: Mapped[str] = mapped_column(String(255))
     floors: Mapped[int] = mapped_column(Integer)
-    id_addition: Mapped[int] = mapped_column(ForeignKey("house_additions.id"))
     max_price: Mapped[float] = mapped_column(DECIMAL(10, 2))
 
     addition: Mapped[list["HouseAddition"]] = relationship("HouseAddition", secondary="house_addition_association", back_populates="house")
