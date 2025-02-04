@@ -37,11 +37,12 @@ class ApartmentService:
         created_apartment = self.apartment_repository.get_one_filter_by(id=new_apartment.id)
         return Status.SUCCESS.value, created_apartment
 
-    def update_partment(self, apartment_id, data: UpdateApartment):
+    def update_apartment(self, apartment_id, data: UpdateApartment):
         entity = data.model_dump()
         entity['id'] = apartment_id
         entity = {k: v for k, v in entity.items() if v is not None}
-        return self.apartment_repository.update(entity)
+        self.apartment_repository.update(apartment_id, entity)
+        return Status.SUCCESS.value
     
     def delete_apartment(self, id_apartment: int):
         self.apartment_image_repository.delete_by_filter(id_apartment=id_apartment)
@@ -57,27 +58,31 @@ class ApartmentService:
         return self.apartment_category_repository.get_one_filter_by(**filter)
     
     def create_apartment_category(self, data: ApartmentCategoryCreate):
-        category = self.apartment_category_repository.add(data.model_dump)
+        category = self.apartment_category_repository.add(data.model_dump())
         if not category:
             return Status.FAILED.value
         return Status.SUCCESS.value, ApartmentCategory(id=category.id, name=category.name)
     
-    def update_apartment_category(self, id_category: int, data: ApartmentCategoryUpdate):
+    def update_apartment_category(self, id: int, data: ApartmentCategoryUpdate):
         entity = data.model_dump()
-        entity['id'] = id_category
+        entity['id'] = id
         entity = {k: v for k, v in entity.items() if v is not None}
-        return self.apartment_category_repository.update(entity)
+        self.apartment_category_repository.update(id, entity)
+        return ApartmentCategory(id=id, name=entity['name'])
     
-    def delete_category(self, id: int):
+    def delete_apartment_category(self, id: int):
         return self.apartment_category_repository.delete(id)
     
     # Apartment Parameters
-    def get_apartment_parameters(self, apartment_id: int):
-        associations = self.apartment_parameter_association_repository.get_all_filter_by(id_apartment=apartment_id)
+    def get_apartment_parameters_by_apartment(self, id_apartment: int):
+        associations = self.apartment_parameter_association_repository.get_all_filter_by(id_apartment=id_apartment)
         if not associations:
             return []
-        parameter_ids = [assoc.id_parameter for assoc in associations]
-        parameters = self.apartment_parameter_repository.get_all_filter_by(id=parameter_ids)
+        parameters = []
+        for assoc in associations:
+            param_records = self.apartment_parameter_repository.get_all_filter_by(id=assoc.id_parameter)
+            for param in param_records:
+                parameters.append(param)
         return parameters
 
     def get_all_apartment_parameters_filter_by(self, **filter):
@@ -87,7 +92,7 @@ class ApartmentService:
         return self.apartment_parameter_repository.get_one_filter_by(**filter)
     
     def create_apartment_parameter(self, data: ApartmentParameterCreate):
-        parameter = self.apartment_parameter_repository.add(data.model_dump)
+        parameter = self.apartment_parameter_repository.add(data.model_dump())
         if not parameter:
             return Status.FAILED.value
         return Status.SUCCESS.value, ApartmentParameter(id=parameter.id, name=parameter.name, status=parameter.status)
@@ -96,10 +101,11 @@ class ApartmentService:
         entity = data.model_dump()
         entity['id'] = id_parameter
         entity = {k: v for k, v in entity.items() if v is not None}
-        return self.apartment_parameter_repository.update(entity)
+        updated_entity = self.apartment_parameter_repository.update(id_parameter, entity)
+        return ApartmentParameter(**updated_entity.__dict__)
 
-    def delete_apartment_parameter(self, id_parameter: int):
-        return self.apartment_parameter_repository.delete(id_parameter)
+    def delete_apartment_parameter(self, id: int):
+        return self.apartment_parameter_repository.delete(id=id)
     
 
     # Apartment Image
@@ -110,7 +116,7 @@ class ApartmentService:
         return self.apartment_image_repository.get_one_filter_by(**filter)
 
     def add_apartment_image(self, data: ApartmentImageCreate):
-        new_image = self.apartment_image_repository.add(data.model_dump)
+        new_image = self.apartment_image_repository.add(data.model_dump())
         if not new_image:
             return Status.FAILED.value
         return Status.SUCCESS.value, new_image
