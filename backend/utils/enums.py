@@ -26,14 +26,23 @@ class Roles(Enum):
     ADMIN = 'ADMIN'
     USER = 'USER'
 
-class OrderStatus(Enum):
+class OrderStatus(str, Enum):
     PENDING = 'PENDING'
-    PROCCESING = 'PROCCESING'
-    COMPLETED = 'COMPLETED'
-    REJECTED = 'REJECTED'
+    APPROVED = 'APPROVED' # Утвержден, ожидает начала работ
+    IN_PROGRESS = "IN_PROGRESS" # В процессе строительства
+    AWAITING_PAYMENT = "AWAITING_PAYMENT"
+    PAID = 'PAID'
+    AWAITING_SIGN_OFF = "AWAITING_SIGN_OFF" # Проверка работы
+    SIGNED = "SIGNED" # Подписан акт
+    COMPLETED = "COMPLETED" 
+    CANCELLED = "CANCELLED"
 
-class HouseStatus(Enum):
-    CONSTRUCT = 'CONSTRUCT'
-    CONSTRUCT_FOR_ORDER = 'CONSTRUCT_FOR_ORDER'
-    FOR_SALE = 'FOR_SALE'
-    SOLD = 'SOLD'
+class HouseStatus(str, Enum):
+    PROJECT = "PROJECT"  # Проектируется
+    PLANNED = "PLANNED"  # Утвержден, ожидает начала строительства
+    IN_PROGRESS = "IN_PROGRESS"  # В процессе строительства
+    SUSPENDED = "SUSPENDED"  # Строительство приостановлено
+    BUILT = "BUILT"  # Строительство завершено
+    FOR_SALE = "FOR_SALE"  # Выставлен на продажу
+    SOLD = "SOLD"  # Продан
+    ARCHIVED = "ARCHIVED"  # Переведен в архив, неактивен

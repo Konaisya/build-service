@@ -31,8 +31,11 @@ class IREpository(AbstractRepository):
         self.model = model
         self.session = session
 
-    def get_all_filter_by(self, **filter):
-        return self.session.query(self.model).filter_by(**filter).all()
+    def get_all_filter_by(self, **filters):
+        query = self.session.query(self.model)
+        for key, value in filters.items():
+            query = query.filter(getattr(self.model, key) == value)
+        return query
 
     def get_one_filter_by(self, **filter):
         return self.session.query(self.model).filter_by(**filter).first()
@@ -43,15 +46,19 @@ class IREpository(AbstractRepository):
         self.session.commit()
         return entity
 
-    def update(self, id: int, entity):
-        self.session.query(self.model).filter_by(id=id).update(entity)
+    def update(self, entity: dict):
+        self.session.query(self.model).filter_by(id=entity['id']).update(entity)
         self.session.commit()
-        updated_entity = self.session.query(self.model).filter_by(id=id).first()
-        return updated_entity
+        return entity
 
     def delete(self, id: int):
         self.session.query(self.model).filter_by(id=id).delete()
         self.session.commit()
+
+    def update_by_filter(self, filters: dict, updates: dict):
+        result = self.session.query(self.model).filter_by(**filters).update(updates)
+        self.session.commit()
+        return result
 
     def delete_by_filter(self, **filter):
         result = self.session.query(self.model).filter_by(**filter).delete()

@@ -10,7 +10,7 @@ async def get_me(user_service: UserService = Depends(get_user_service), user = D
     user_info = user_service.get_user_filter_by(id=user.id)
     if not user_info:
         raise HTTPException(status_code=404, detail={'status': AuthStatus.USER_NOT_FOUND.value})
-    return UserResponse(id=user_info.id, name=user_info.name, org_name=user_info.org_name, email=user_info.email) 
+    return UserResponse(**user_info.__dict__) 
 
 @router.put('/')
 async def update_user(data: UserUpdate, user_id: int = Query(None), user_service: UserService = Depends(get_user_service), user = Depends(get_current_user)):
@@ -26,7 +26,10 @@ async def get_all_users(user_service: UserService = Depends(get_user_service), u
     if user.role != Roles.ADMIN.value:
         raise HTTPException(status_code=403, detail={'status': AuthStatus.FORBIDDEN.value})
     users = user_service.get_all_users_filter_by()
-    return {'status': Status.SUCCESS.value, 'data': users}
+    response = []
+    for user in users:
+        response.append(UserResponse(**user.__dict__))
+    return response
 
 @router.put('/updatename')
 async def update_current_user(name: str, user_service: UserService = Depends(get_user_service), user = Depends(get_current_user)):

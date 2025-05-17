@@ -1,115 +1,105 @@
 from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional
+from schemas.apartments import ApartmentResponse
+from datetime import date
 from utils.enums import HouseStatus
 
-class HouseImageCreate(BaseModel):
-    image: str = Field(max_length=255)
-    id_house: int = Field(ge=1)
+class AttributeResponse(BaseModel):
+    id: int
+    name: str
+    description: str
 
-class HouseImageUpdate(BaseModel):
-    image: Optional[str] = None
-    id_house: Optional[int] = None
+class CreateAttribute(BaseModel):
+    name: str
+    description: str
 
-class HouseImage(BaseModel):
-    id: int 
+class UpdateAttribute(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+
+
+class HouseAttributeResponse(BaseModel):
+    attribute: AttributeResponse
+    value: str
+
+class HouseAttributeForm(BaseModel):
+    id_attribute: int
+    value: str
+
+
+class HouseImageResponse(BaseModel):
+    id: int
     image: str
+
+class HouseImageForm(BaseModel):
     id_house: int
+    image: str
+
+class ImageToDelete(BaseModel):
+    ids_images: List[int]
 
 
-class AdditionCreate(BaseModel):
-    name: str = Field(max_length=255)
-    description: Optional[str] = None
-    status: str = Field(max_length=255)
-    price: float = Field(ge=0.0)
-
-class AdditionUpdate(BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    status: Optional[str] = None
-    price: Optional[str] = None
-    
-    @field_validator('name')
-    @classmethod
-    def name_len_validate(cls, val: str) -> str:
-        if (len(val) > 255):
-            raise ValueError('Name must be less than 255 characters')
-        return val
-    
-    @field_validator('price')
-    @classmethod
-    def id_addition_validate(cls, val: float) -> float:
-        if (val < 0.0):
-            raise ValueError("Price must be greater than 0.0")
-        return val
-
-class Addition(BaseModel):
-    id: int
+class HouseResponse(BaseModel):
     name: str
-    description: Optional[str]
-    status: str
-    price: float
-
-
-class HouseCreate(BaseModel):
-    name: str = Field(max_length=255)
-    description: Optional[str] = None
-    image: Optional[str] = Field(default="placeholder.png", max_length=255)
+    description: str
+    main_image: str
     status: HouseStatus
-    address: str = Field(max_length=255)
-    floors: int = Field(ge=1)
-    addition_ids: Optional[List[int]] = Field(None)
- 
-    max_price: Optional[float] = Field(default=None, ge=0.0)
-
-class HouseUpdate(BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    image: Optional[str] = None
-    status: Optional[HouseStatus] = None
-    address: Optional[str] = None
-    floors: Optional[int] = None
-    id_addition: Optional[int] = None
-    max_price: Optional[float] = None
-    addition_ids: Optional[List[int]] = Field(None)
-
-    @field_validator('name')
-    @classmethod
-    def name_len_validate(cls, val: str) -> str:
-        if (len(val) > 255):
-            raise ValueError('Name must be less than 255 characters')
-        return val
-    
-    @field_validator('floors')
-    @classmethod
-    def floors_validate(cls, val: int) -> int:
-        if (val < 1):
-            raise ValueError("Floors must be greater than 0")
-        return val
-    
-    @field_validator('id_addition')
-    @classmethod
-    def id_addition_validate(cls, val: int) -> int:
-        if (val < 1):
-            raise ValueError("Addition id must be greater than 0")
-        return val
-    
-    @field_validator('max_price')
-    @classmethod
-    def id_addition_validate(cls, val: float) -> float:
-        if (val < 0.0):
-            raise ValueError("Max price must be greater than 0.0")
-        return val
-
-class House(BaseModel):
-    from schemas.apartments import Apartment
-
-    id: int
-    name: str
-    description: Optional[str] = None
-    status: HouseStatus
+    is_order: bool
+    district: str
     address: str
     floors: int
-    max_price: float
-    additions: List[Addition]
-    apartments: List[Apartment]
-    images: List[HouseImage]
+    entrances: int
+    begin_date: date
+    end_date: date
+    start_price: float
+    final_price: float
+    attributes: List[HouseAttributeResponse]
+    images: List[HouseImageResponse]
+    apartments: List[ApartmentResponse]
+
+class CreateHouse(BaseModel):
+    name: str
+    description: str
+    status: HouseStatus
+    is_order: bool = False
+    district: str
+    address: str
+    floors: int
+    entrances: int
+    begin_date: date
+    end_date: date
+    start_price: float
+    final_price: float
+    attributes: List[HouseAttributeForm]
+
+class UpdateHouse(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    main_image: Optional[str] = None
+    status: Optional[HouseStatus] = None
+    is_order: Optional[bool] = None
+    district: Optional[str] = None
+    address: Optional[str] = None
+    floors: Optional[int] = None
+    entrances: Optional[int] = None
+    begin_date: Optional[date] = None
+    end_date: Optional[date] = None
+    start_price: Optional[float] = None
+    final_price: Optional[float] = None
+    attributes: List[HouseAttributeForm] = []
+    images: List[HouseImageForm] = []
+
+class ShortHouseResponse(BaseModel):
+    id: int
+    name: str
+    main_image: str
+    status: HouseStatus
+    is_order: bool
+    district: str
+    address: str
+    floors: int
+    entrances: int
+    begin_date: date
+    end_date: date
+    start_price: float
+    final_price: float
