@@ -2,75 +2,85 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link'; 
 import '@/styles/header.css'; 
-import axios from 'axios';
-import { useRouter } from 'next/navigation';
+function parseJwt(token: string): { role?: string } | null {
+  try {
+    const base64Url = token.split('.')[1];
+    if (!base64Url) return null;
+
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+
+    return JSON.parse(jsonPayload);
+  } catch {
+    return null;
+  }
+}
 
 const Header: React.FC = () => {
-    const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
-    const [accessToken, setAccessToken] = useState<string | null>(null);
-    const router = useRouter();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [role, setRole] = useState<string | null>(null);
 
-    const toggleSidebar = () => {
-        setIsSidebarOpen(!isSidebarOpen);
+  const updateAccessToken = () => {
+    const token = localStorage.getItem('accessToken');
+    setAccessToken(token);
+
+    if (token) {
+      const decoded = parseJwt(token);
+      setRole(decoded?.role ?? null);
+    } else {
+      setRole(null);
+    }
+  };
+
+  useEffect(() => {
+    updateAccessToken();
+    window.addEventListener('storage', updateAccessToken);
+    return () => {
+      window.removeEventListener('storage', updateAccessToken);
     };
+  }, []);
 
-    const closeSidebar = () => {
-        setIsSidebarOpen(false);
-    };
+  useEffect(() => {
+    console.log('Token:', accessToken);
+    console.log('Role:', role);
+  }, [accessToken, role]);
 
-    const handleClickOutside = (event: MouseEvent) => {
-        const sidebar = document.querySelector('.sidebar') as HTMLElement;
-        const burgerButton = document.querySelector('.burger-button') as HTMLElement;
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
-        if (sidebar && !sidebar.contains(event.target as Node) && !burgerButton?.contains(event.target as Node)) {
-            closeSidebar();
-        }
-    };
+  return (
+    <div className="all-header">
+      <div className={`burger-button ${isSidebarOpen ? 'sidebar-open' : ''}`}>
+        <button className="burger-button" onClick={toggleSidebar}>
+          <span className="button-span">Н</span>авигация
+        </button>
+      </div>
+      <div className={`sidebar ${isSidebarOpen ? 'show' : ''}`}>
+        <ul>
+          <li><Link href="/" className="headerLink">Главная</Link></li>
+          <li><Link href="/services" className="headerLink">Услуги</Link></li>
+          <li><Link href="/about" className="headerLink">О нас</Link></li>
 
-    useEffect(() => {
-        document.addEventListener('click', handleClickOutside);
-        return () => {
-            document.removeEventListener('click', handleClickOutside);
-        };
-    }, []);
+          {accessToken && role === 'ADMIN' && (
+            <li><Link href="/admin" className="headerLink">Админ панель</Link></li>
+          )}
 
-    useEffect(() => {
-        const updateAccessToken = () => {
-            const token = localStorage.getItem('access_token');
-            setAccessToken(token);
-        };
-        updateAccessToken();
+          {accessToken && role === 'USER' && (
+            <li><Link href="/profile" className="headerLink">Профиль</Link></li>
+          )}
 
-        window.addEventListener('storage', updateAccessToken);
-
-        return () => {
-            window.removeEventListener('storage', updateAccessToken);
-        };
-    }, []);
-
-    return (
-        <div className='all-header'>
-            <div className={`burger-button ${isSidebarOpen ? 'sidebar-open' : ''}`}>
-                <button className="burger-button" onClick={toggleSidebar}>
-                    <span className='button-span'>Н</span>авигация
-                </button>
-            </div>
-            <div className={`sidebar ${isSidebarOpen ? 'show' : ''}`}>
-                <ul>
-                    <li><Link href='/' className='headerLink'>Главная</Link></li>
-                    <li><Link href='/services' className='headerLink'>Услуги</Link></li>
-                    <li><Link href='/about' className='headerLink'>О нас</Link></li>
-                    {accessToken ? (
-                        <>
-                            <li><Link href='/profile' className='headerLink'>Профиль</Link></li>
-                        </>
-                    ) : (
-                        <li><Link href='/auth' className='headerLink'>Войти</Link></li>
-                    )}
-                </ul>
-            </div>
-        </div>
-    );
+          {!accessToken && (
+            <li><Link href="/auth" className="headerLink">Войти</Link></li>
+          )}
+        </ul>
+      </div>
+    </div>
+  );
 };
 
 export default Header;

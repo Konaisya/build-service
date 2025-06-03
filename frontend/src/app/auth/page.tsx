@@ -1,176 +1,150 @@
-"use client"
-import "./style.css"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import React, { useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { useRouter } from "next/navigation"
-import { useLogin } from '@/hooks/use-login' 
+'use client';
 
-const Auth = () => {
-    const [isLogin, setIsLogin] = useState(true)
-    const [email, setEmail] = useState("")
-    const [name, setName] = useState("") 
-    const [password, setPassword] = useState("")
-    const [orgName, setOrgName] = useState("")
-    const [errorMessage, setErrorMessage] = useState("")
-    const { handleLogin, loading, error, token } = useLogin(); // Используем наш хук
+import { useState } from "react";
+import { useAuth } from "@/lib/api/AuthContext";
 
-    const toggleAuthMode = () => {
-        setIsLogin(!isLogin)
-        setErrorMessage("") 
-    }
+const inputClass = "w-full px-4 py-3 mb-4 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition";
+const buttonClass = "w-full bg-blue-600 text-white py-3 rounded-md font-semibold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed";
 
-    const handleLoginClick = async () => {
-        if (!email || !password) {
-            console.error("Пожалуйста, заполните все поля.");
-            return;
-        }
-        
-        try {
-            await handleLogin(email, password);
-        } catch (error) {
-            console.error('Ошибка при входе:', error);
-        }
-    };
+export default function AuthPage() {
+  const [isLogin, setIsLogin] = useState(true);
+  const { login, signup, loading, error } = useAuth();
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
 
-    // const handleRegister = async () => {
-    //     setLoading(true);
-    //     setErrorMessage("");
-    //     try {
-    //         const response = await axios.post<{ access_token: string }>(
-    //             'http://localhost:8000/api/auth/signup',
-    //             {
-    //                 name,
-    //                 email,
-    //                 password,
-    //                 org_name: orgName,
-    //             },
-    //             {
-    //                 headers: { 'Content-Type': 'application/json' },
-    //             }
-    //         );
-    //         localStorage.setItem('access_token', response.data.access_token);
-    //         console.log("Успешная регистрация!");
-    //     } catch (error: unknown) {
-    //         if (axios.isAxiosError(error) && error.response) {
-    //             setErrorMessage(
-    //                 error.response.data?.detail || "Ошибка при регистрации. Проверьте данные и попробуйте снова."
-    //             );
-    //         } else {
-    //             setErrorMessage("Непредвиденная ошибка. Попробуйте снова.");
-    //         }
-    //         console.error("Ошибка при регистрации:", error);
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // };
+  const [regName, setRegName] = useState("");
+  const [regOrg, setRegOrg] = useState("");
+  const [regEmail, setRegEmail] = useState("");
+  const [regPassword, setRegPassword] = useState("");
 
-    return (
-        <div className="all-auth" style={{ position: 'relative'}}>
-            <AnimatePresence>
-                {isLogin ? (
-                    <motion.div 
-                        key="login"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.5 }}
-                        className="auth-container"
-                        style={{ position: 'absolute', width: '100%' }}
-                    >
-                        <div className="auth-header">
-                            <h1 className="auth-header-title">Авторизация</h1>
-                        </div>
-                        <div className="auth-content">
-                            {errorMessage && <p className="auth-error">{errorMessage}</p>}
-                            {error && <p className="auth-error">{error}</p>}
-                            <div className="auth-input">
-                                <Label htmlFor="email">Email</Label>
-                                <Input 
-                                    id="email" 
-                                    type="email" 
-                                    value={email} 
-                                    onChange={(e) => setEmail(e.target.value)}
-                                />
-                            </div>
-                            <div className="auth-input">
-                                <Label htmlFor="password">Пароль</Label>
-                                <Input 
-                                    id="password" 
-                                    type="password" 
-                                    value={password} 
-                                    onChange={(e) => setPassword(e.target.value)}
-                                />
-                            </div>
-                            <Button onClick={handleLoginClick} className="auth-button" disabled={loading}>
-                                {loading ? "Вход..." : "Войти"}
-                            </Button>
-                            <Button onClick={toggleAuthMode} className="auth-button">Нет аккаунта?</Button>
-                        </div>
-                    </motion.div>
-                ) : (
-                    <motion.div
-                        key="register"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.5 }}
-                        className="auth-container"
-                        style={{ position: 'absolute', width: '100%' }}
-                    >
-                        <div className="auth-header">
-                            <h1 className="auth-header-title">Регистрация</h1>
-                        </div>
-                        <div className="auth-content">
-                            {errorMessage && <p className="auth-error">{errorMessage}</p>}
-                            <div className="auth-input">
-                                <Label htmlFor="name">Имя</Label>
-                                <Input 
-                                    id="name" 
-                                    type="text" 
-                                    value={name} 
-                                    onChange={(e) => setName(e.target.value)}
-                                />
-                            </div>
-                            <div className="auth-input">
-                                <Label htmlFor="organization">Организация</Label>
-                                <Input 
-                                    id="organization" 
-                                    type="text" 
-                                    value={orgName} 
-                                    onChange={(e) => setOrgName(e.target.value)}
-                                />
-                            </div>
-                            <div className="auth-input">
-                                <Label htmlFor="email">Email</Label>
-                                <Input 
-                                    id="email" 
-                                    type="email" 
-                                    value={email} 
-                                    onChange={(e) => setEmail(e.target.value)}
-                                />
-                            </div>
-                            <div className="auth-input">
-                                <Label htmlFor="password">Пароль</Label>
-                                <Input 
-                                    id="password" 
-                                    type="password" 
-                                    value={password} 
-                                    onChange={(e) => setPassword(e.target.value)}
-                                />
-                            </div>
-                            {/* <Button onClick={handleRegister} className="auth-button" disabled={loading}>
-                                {loading ? "Регистрация..." : "Зарегистрироваться"}
-                            </Button> */}
-                            <Button onClick={toggleAuthMode} className="auth-button">Уже есть аккаунт?</Button>
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </div>
-    )
+  const handleLoginSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await login(loginEmail, loginPassword);
+  };
+
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await signup(regName, regOrg, regEmail, regPassword);
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
+      <div className="mb-6 flex space-x-4">
+        <button
+          onClick={() => setIsLogin(true)}
+          className={`px-6 py-2 rounded font-semibold transition ${
+            isLogin
+              ? "bg-blue-600 text-white shadow-md"
+              : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+          }`}
+          type="button"
+        >
+          Вход
+        </button>
+        <button
+          onClick={() => setIsLogin(false)}
+          className={`px-6 py-2 rounded font-semibold transition ${
+            !isLogin
+              ? "bg-blue-600 text-white shadow-md"
+              : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+          }`}
+          type="button"
+        >
+          Регистрация
+        </button>
+      </div>
+
+      {isLogin ? (
+        <form
+          onSubmit={handleLoginSubmit}
+          className="max-w-md w-full p-6 bg-white rounded-lg shadow-md"
+          noValidate
+        >
+          <h2 className="text-2xl font-bold mb-6 text-center">Вход</h2>
+
+          <input
+            type="email"
+            placeholder="Email"
+            className={inputClass}
+            value={loginEmail}
+            onChange={(e) => setLoginEmail(e.target.value)}
+            required
+          />
+          <input
+            type="password"
+            placeholder="Пароль"
+            className={inputClass}
+            value={loginPassword}
+            onChange={(e) => setLoginPassword(e.target.value)}
+            required
+          />
+
+          {error && (
+            <p className="text-red-600 text-sm mb-4">{error}</p>
+          )}
+
+          <button 
+            type="submit" 
+            disabled={loading} 
+            className={buttonClass}
+          >
+            {loading ? "Загрузка..." : "Войти"}
+          </button>
+        </form>
+      ) : (
+        <form
+          onSubmit={handleRegisterSubmit}
+          className="max-w-md w-full p-6 bg-white rounded-lg shadow-md"
+          noValidate
+        >
+          <h2 className="text-2xl font-bold mb-6 text-center">Регистрация</h2>
+
+          <input
+            type="text"
+            placeholder="Имя"
+            className={inputClass}
+            value={regName}
+            onChange={(e) => setRegName(e.target.value)}
+            required
+          />
+          <input
+            type="text"
+            placeholder="Организация"
+            className={inputClass}
+            value={regOrg}
+            onChange={(e) => setRegOrg(e.target.value)}
+            required
+          />
+          <input
+            type="email"
+            placeholder="Email"
+            className={inputClass}
+            value={regEmail}
+            onChange={(e) => setRegEmail(e.target.value)}
+            required
+          />
+          <input
+            type="password"
+            placeholder="Пароль"
+            className={inputClass}
+            value={regPassword}
+            onChange={(e) => setRegPassword(e.target.value)}
+            required
+          />
+
+          {error && (
+            <p className="text-red-600 text-sm mb-4">{error}</p>
+          )}
+
+          <button 
+            type="submit" 
+            disabled={loading} 
+            className={buttonClass}
+          >
+            {loading ? "Загрузка..." : "Зарегистрироваться"}
+          </button>
+        </form>
+      )}
+    </div>
+  );
 }
-
-export default Auth
