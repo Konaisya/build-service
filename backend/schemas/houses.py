@@ -40,6 +40,7 @@ class ImageToDelete(BaseModel):
 
 
 class HouseResponse(BaseModel):
+    id: int
     name: str
     description: str
     main_image: str
@@ -69,7 +70,7 @@ class CreateHouse(BaseModel):
     begin_date: date
     end_date: date
     start_price: float
-    final_price: float
+    final_price: Optional[float] = None
     attributes: List[HouseAttributeForm]
 
 class UpdateHouse(BaseModel):

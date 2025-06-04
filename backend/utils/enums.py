@@ -36,6 +36,8 @@ class OrderStatus(str, Enum):
     SIGNED = "SIGNED" # Подписан акт
     COMPLETED = "COMPLETED" 
     CANCELLED = "CANCELLED"
+    SOLD = "SOLD" # Особый статус для заказа если куплен готовый дом
+    
 
 class HouseStatus(str, Enum):
     PROJECT = "PROJECT"  # Проектируется

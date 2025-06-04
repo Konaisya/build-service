@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
 from typing import List
 from utils.image import save_image
-from dependencies import OrderService, get_order_service, HouseService, get_house_service, UserService, get_user_service
-from utils.enums import Status, OrderStatus, HouseStatus
+from dependencies import OrderService, get_order_service, HouseService, get_house_service, UserService, get_user_service, get_current_user
+from utils.enums import Status, OrderStatus, HouseStatus, Roles
 from schemas.orders import *
 from schemas.houses import UpdateHouse
 from datetime import datetime
@@ -12,19 +12,33 @@ router = APIRouter()
 @router.post('/', status_code=201)
 async def create_order(data: CreateOrder,
                        order_service: OrderService = Depends(get_order_service),
-                       house_service: HouseService = Depends(get_house_service)):
+                       house_service: HouseService = Depends(get_house_service),
+                       user = Depends(get_current_user)):
     data = data.model_dump()
-    data['id_user'] = 1
+    data['id_user'] = user.id
     data['status'] = OrderStatus.PENDING.value
     data['create_date'] = datetime.now().strftime('%Y-%m-%d')
-
-    house = data.pop('house')
-    house['status'] = HouseStatus.PROJECT.value
-    house['is_order'] = True
-    create_house = house_service.create_house(CreateHouse(**house))
-    if not create_house:
-        raise HTTPException(status_code=400, detail={'status': Status.FAILED.value, 'message': 'House not created'})
-    data['id_house'] = create_house.id
+    if data.get('house') is not None:
+        house = data.pop('house')
+        house['status'] = HouseStatus.PROJECT.value
+        house['is_order'] = True
+        create_house = house_service.create_house(CreateHouse(**house))
+        if not create_house:
+            raise HTTPException(status_code=400, detail={'status': Status.FAILED.value, 'message': 'House not created'})
+        data['id_house'] = create_house.id
+    elif data.get('id_house') is not None:
+        house = data.pop('house')
+        id_house = data['id_house']
+        house_data = house_service.get_one_house_filter_by(id=id_house)
+        if not house_data:
+            raise HTTPException(status_code=404, detail={'status': Status.NOT_FOUND.value, 'message': 'House not found'})
+        house = house_data.__dict__
+        house['status'] = HouseStatus.SOLD.value
+        house['is_order'] = True
+        data['status'] = OrderStatus.SOLD.value
+        data['contract_price'] = house_data.final_price 
+        data['id_house'] = house['id']
+        update_house = house_service.update_house(id=id_house, upd_house=UpdateHouse(**house))
     create_order = order_service.create_order(data)
     if not create_order:
         raise HTTPException(status_code=400, detail={'status': Status.FAILED.value, 'message': 'Order not created'})
@@ -40,9 +54,14 @@ async def get_all_orders(id_user: int | None = Query(None),
                          order_service: OrderService = Depends(get_order_service),
                          house_service: HouseService = Depends(get_house_service),
                          user_service: UserService = Depends(get_user_service),
-                         ):
-    filter = {k: v for k, v in locals().items() if v is not None and k 
-                not in {'order_service', 'house_service', 'user_service', 'user'}}
+                         user = Depends(get_current_user)):
+    if user.role == Roles.ADMIN.value:
+        filter = {k: v for k, v in locals().items() if v is not None and k 
+                    not in {'order_service', 'house_service', 'user_service', 'user'}}
+    else:
+        filter = {k: v for k, v in locals().items() if v is not None and k 
+                    not in {'order_service', 'house_service', 'user_service', 'user'}}
+        filter['id_user'] = user.id
     orders = order_service.get_all_orders_filter_by(**filter)
     if not orders:
         raise HTTPException(status_code=404, detail={'status': Status.FAILED.value})
@@ -66,7 +85,8 @@ async def get_all_orders(id_user: int | None = Query(None),
 async def get_one_order(id: int,
                         order_service: OrderService = Depends(get_order_service),
                         house_service: HouseService = Depends(get_house_service),
-                        user_service: UserService = Depends(get_user_service)):
+                        user_service: UserService = Depends(get_user_service),
+                        user = Depends(get_current_user)):
     order = order_service.get_one_order_filter_by(id=id)
     if not order:
         raise HTTPException(status_code=404, detail={'status': Status.FAILED.value})
@@ -87,7 +107,8 @@ async def get_one_order(id: int,
 async def update_order(id: int,
                        data: UpdateOrder,
                        order_service: OrderService = Depends(get_order_service),
-                       house_service: HouseService = Depends(get_house_service)):
+                       house_service: HouseService = Depends(get_house_service),
+                       user = Depends(get_current_user)):
     order = order_service.get_one_order_filter_by(id=id)
     if not order:
         raise HTTPException(status_code=404, detail={'status': Status.NOT_FOUND.value})
@@ -107,7 +128,8 @@ async def update_order(id: int,
 
 @router.delete('/{id}', status_code=200)
 async def delete_order(id: int,
-                        order_service: OrderService = Depends(get_order_service)):
+                        order_service: OrderService = Depends(get_order_service),
+                        user = Depends(get_current_user)):
     order = order_service.get_one_order_filter_by(id=id)
     if not order:
         raise HTTPException(status_code=404, detail={'status': Status.NOT_FOUND.value})
