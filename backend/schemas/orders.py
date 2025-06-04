@@ -16,9 +16,10 @@ class OrderResponse(BaseModel):
     update_date: Optional[date] = None
 
 class CreateOrder(BaseModel):
-    house: CreateHouse
-    contract_price: float
-
+    id_house: Optional[int] = None # Если покупается готовый дом
+    house: Optional[CreateHouse] = None # Если заказывается новый дом
+    contract_price: Optional[float] = None
+    
 class UpdateOrder(BaseModel):
     status: OrderStatus
     contract_price: Optional[float] = None
