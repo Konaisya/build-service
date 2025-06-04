@@ -1,7 +1,6 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Mail } from 'lucide-react';
 
 const About = () => {
   return (
@@ -47,7 +46,7 @@ const About = () => {
                 hidden: { opacity: 0, y: 15 },
                 visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
               }}
-              whileHover={{ scale: 1.03, color: '#4F46E5' }} // hover немного масштаб и цвет
+              whileHover={{ scale: 1.03, color: '#4F46E5' }} 
               className="cursor-default select-text"
             >
               {text}

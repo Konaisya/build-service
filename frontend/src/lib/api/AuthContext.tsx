@@ -1,6 +1,12 @@
 'use client';
 
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 
@@ -13,10 +19,16 @@ interface AuthContextType {
   user: User | null;
   accessToken: string | null;
   login: (email: string, password: string) => Promise<void>;
-  signup: (name: string, orgName: string, email: string, password: string) => Promise<void>;
+  signup: (
+    name: string,
+    orgName: string,
+    email: string,
+    password: string
+  ) => Promise<void>;
   logout: () => void;
   loading: boolean;
   error: string | null;
+  isInitialized: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -30,7 +42,8 @@ function parseJwt(token: string): any | null {
     const jsonPayload = decodeURIComponent(
       atob(base64)
         .split('')
-        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
     );
 
     return JSON.parse(jsonPayload);
@@ -46,6 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
@@ -58,13 +72,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.removeItem('accessToken');
       }
     }
+    setIsInitialized(true);
   }, []);
 
   const login = async (email: string, password: string) => {
     setLoading(true);
     setError(null);
     try {
-      const formBody = `email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
+      const formBody = `email=${encodeURIComponent(
+        email
+      )}&password=${encodeURIComponent(password)}`;
 
       const res = await axios.post(
         'http://127.0.0.1:8000/api/auth/login',
@@ -96,30 +113,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error('Неверный ответ сервера');
       }
     } catch (err: any) {
-      setError(err.response?.data?.detail?.[0]?.msg || err.message || 'Ошибка входа');
+      setError(
+        err.response?.data?.detail?.[0]?.msg || err.message || 'Ошибка входа'
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const signup = async (name: string, orgName: string, email: string, password: string) => {
+  const signup = async (
+    name: string,
+    orgName: string,
+    email: string,
+    password: string
+  ) => {
     setLoading(true);
     setError(null);
     try {
-      await axios.post('http://127.0.0.1:8000/api/auth/signup', {
-        name,
-        org_name: orgName,
-        email,
-        password,
-      }, {
-        headers: {
-          'Content-Type': 'application/json'
+      await axios.post(
+        'http://127.0.0.1:8000/api/auth/signup',
+        {
+          name,
+          org_name: orgName,
+          email,
+          password,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
         }
-      });
+      );
 
       await login(email, password);
     } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Ошибка регистрации');
+      setError(
+        err.response?.data?.message || err.message || 'Ошибка регистрации'
+      );
     } finally {
       setLoading(false);
     }
@@ -129,19 +159,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setAccessToken(null);
     localStorage.removeItem('accessToken');
-    router.push('/auth'); 
+    router.push('/auth');
   };
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      accessToken,
-      login,
-      signup,
-      logout,
-      loading,
-      error
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        accessToken,
+        login,
+        signup,
+        logout,
+        loading,
+        error,
+        isInitialized,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

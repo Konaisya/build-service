@@ -1,7 +1,8 @@
-'use client'
+'use client';
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link'; 
-import '@/styles/header.css'; 
+import Link from 'next/link';
+import '@/styles/header.css';
+
 function parseJwt(token: string): { role?: string } | null {
   try {
     const base64Url = token.split('.')[1];
@@ -26,30 +27,18 @@ const Header: React.FC = () => {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [role, setRole] = useState<string | null>(null);
 
-  const updateAccessToken = () => {
-    const token = localStorage.getItem('accessToken');
-    setAccessToken(token);
-
-    if (token) {
-      const decoded = parseJwt(token);
+  useEffect(() => {
+    const checkToken = () => {
+      const token = localStorage.getItem('accessToken');
+      const decoded = token ? parseJwt(token) : null;
+      setAccessToken(token);
       setRole(decoded?.role ?? null);
-    } else {
-      setRole(null);
-    }
-  };
-
-  useEffect(() => {
-    updateAccessToken();
-    window.addEventListener('storage', updateAccessToken);
-    return () => {
-      window.removeEventListener('storage', updateAccessToken);
     };
-  }, []);
 
-  useEffect(() => {
-    console.log('Token:', accessToken);
-    console.log('Role:', role);
-  }, [accessToken, role]);
+    checkToken(); 
+    const interval = setInterval(checkToken, 1000);
+    return () => clearInterval(interval); 
+  }, []);
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
