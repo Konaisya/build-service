@@ -4,18 +4,16 @@ import { useState, useEffect, ChangeEvent } from 'react';
 import axios from 'axios';
 import { useAuth } from '@/lib/api/AuthContext';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Edit, Image as ImageIcon, Home, MapPin, Layers, DoorOpen, Calendar, DollarSign, Building, Hotel, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, Trash2, Edit, Image as ImageIcon, Home, MapPin, Layers, DoorOpen, Calendar, DollarSign, Building, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import Image from 'next/image';
+import AdminSidebar from '@/components/ui/adminSidebbar';
 
 type Attribute = {
   attribute: {
@@ -56,10 +54,6 @@ type Apartment = {
   category: ApartmentCategory;
   parameters: ApartmentParameter[];
   images: ApartmentImage[];
-  house?: {
-    name: string;
-    address: string;
-  };
 };
 
 type HouseImage = {
@@ -116,23 +110,21 @@ const ApartmentParametersManager = ({
   return (
     <div className="space-y-4">
       <div className="flex gap-2 items-center">
-        <Select
+        {/* Заменить Select на обычный select */}
+        <select
+          className="w-[180px] border rounded px-2 py-1"
           value={selectedParamId?.toString() || ''}
-          onValueChange={(value) => setSelectedParamId(Number(value))}
+          onChange={(e) => setSelectedParamId(Number(e.target.value))}
         >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Выберите параметр" />
-          </SelectTrigger>
-          <SelectContent>
-            {availableParameters
-              .filter(param => !parameters.some(p => p.id_parameter === param.id))
-              .map(param => (
-                <SelectItem key={param.id} value={param.id.toString()}>
-                  {param.name}
-                </SelectItem>
-              ))}
-          </SelectContent>
-        </Select>
+          <option value="">Выберите параметр</option>
+          {availableParameters
+            .filter(param => !parameters.some(p => p.id_parameter === param.id))
+            .map(param => (
+              <option key={param.id} value={param.id.toString()}>
+                {param.name}
+              </option>
+            ))}
+        </select>
         <Button
           onClick={() => {
             if (selectedParamId) {
@@ -190,23 +182,21 @@ const HouseAttributesManager = ({
   return (
     <div className="space-y-4">
       <div className="flex gap-2 items-center">
-        <Select
+        {/* Заменить Select на обычный select */}
+        <select
+          className="w-[180px] border rounded px-2 py-1"
           value={selectedAttrId?.toString() || ''}
-          onValueChange={(value) => setSelectedAttrId(Number(value))}
+          onChange={(e) => setSelectedAttrId(Number(e.target.value))}
         >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Выберите атрибут" />
-          </SelectTrigger>
-          <SelectContent>
-            {availableAttributes
-              .filter(attr => !attributes.some(a => a.attribute.id === attr.id))
-              .map(attr => (
-                <SelectItem key={attr.id} value={attr.id.toString()}>
-                  {attr.name}
-                </SelectItem>
-              ))}
-          </SelectContent>
-        </Select>
+          <option value="">Выберите атрибут</option>
+          {availableAttributes
+            .filter(attr => !attributes.some(a => a.attribute.id === attr.id))
+            .map(attr => (
+              <option key={attr.id} value={attr.id.toString()}>
+                {attr.name}
+              </option>
+            ))}
+        </select>
         <Button
           onClick={() => {
             if (selectedAttrId) {
@@ -249,14 +239,13 @@ const HouseAttributesManager = ({
 const AdminHousesPage = () => {
   const { accessToken } = useAuth();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState('houses');
   const [houses, setHouses] = useState<House[]>([]);
-  const [allApartments, setAllApartments] = useState<Apartment[]>([]);
   const [categories, setCategories] = useState<ApartmentCategory[]>([]);
   const [parameters, setParameters] = useState<any[]>([]);
   const [attributes, setAttributes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   const [isCreateHouseModalOpen, setIsCreateHouseModalOpen] = useState(false);
   const [isEditHouseModalOpen, setIsEditHouseModalOpen] = useState(false);
@@ -267,6 +256,7 @@ const AdminHousesPage = () => {
   const [isApartmentImageModalOpen, setIsApartmentImageModalOpen] = useState(false);
   const [isDeleteApartmentModalOpen, setIsDeleteApartmentModalOpen] = useState(false);
   const [isHouseInfoModalOpen, setIsHouseInfoModalOpen] = useState(false);
+  const [isCreateAttributeModalOpen, setIsCreateAttributeModalOpen] = useState(false);
   
   const [currentHouse, setCurrentHouse] = useState<House | null>(null);
   const [currentApartment, setCurrentApartment] = useState<Apartment | null>(null);
@@ -274,7 +264,6 @@ const AdminHousesPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [expandedHouseId, setExpandedHouseId] = useState<number | null>(null);
-  const [expandedApartmentId, setExpandedApartmentId] = useState<number | null>(null);
 
   const [houseForm, setHouseForm] = useState({
     name: '',
@@ -305,62 +294,49 @@ const AdminHousesPage = () => {
 
   const [houseImageFile, setHouseImageFile] = useState<File | null>(null);
   const [apartmentImageFile, setApartmentImageFile] = useState<File | null>(null);
+  const [newAttributeForm, setNewAttributeForm] = useState({ name: '', description: '' });
+
+  const fetchData = async () => {
+    if (!accessToken) return;
+    try {
+      if (isInitialLoading) setLoading(true);
+      const [housesRes, categoriesRes, parametersRes, attributesRes] = await Promise.all([
+        axios.get('http://127.0.0.1:8000/api/houses/', {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+        axios.get('http://127.0.0.1:8000/api/apartment_category/', {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+        axios.get('http://127.0.0.1:8000/api/apartment_parameters/', {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+        axios.get('http://127.0.0.1:8000/api/house_attributes/', {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      ]);
+
+      const validHouses = housesRes.data.map((house: any) => ({
+        ...house,
+        apartments: house.apartments || [],
+        images: house.images || [],
+        attributes: house.attributes || []
+      }));
+
+      setHouses(validHouses);
+      setCategories(categoriesRes.data);
+      setParameters(parametersRes.data);
+      setAttributes(attributesRes.data);
+    } catch (err) {
+      setError('Ошибка загрузки данных');
+      console.error(err);
+    } finally {
+      setLoading(false);
+      setIsInitialLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if (!accessToken) return;
-
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const [housesRes, apartmentsRes, categoriesRes, parametersRes, attributesRes] = await Promise.all([
-          axios.get('http://127.0.0.1:8000/api/houses/', {
-            headers: { Authorization: `Bearer ${accessToken}` },
-          }),
-          axios.get('http://127.0.0.1:8000/api/apartments/', {
-            headers: { Authorization: `Bearer ${accessToken}` },
-          }),
-          axios.get('http://127.0.0.1:8000/api/apartment_category/', {
-            headers: { Authorization: `Bearer ${accessToken}` },
-          }),
-          axios.get('http://127.0.0.1:8000/api/apartment_parameters/', {
-            headers: { Authorization: `Bearer ${accessToken}` },
-          }),
-          axios.get('http://127.0.0.1:8000/api/house_attributes/', {
-            headers: { Authorization: `Bearer ${accessToken}` },
-          }),
-        ]);
-
-        const validHouses = housesRes.data.map((house: any, idx: number) => ({
-          ...house,
-          id: typeof house.id === 'number' && Number.isInteger(house.id)
-            ? house.id
-            : idx + 1, 
-          apartments: house.apartments || [],
-          images: house.images || [],
-          attributes: house.attributes || []
-        }));
-
-        setHouses(validHouses);
-        
-        const apartmentsWithHouse = apartmentsRes.data.map((apartment: Apartment) => {
-          const house = validHouses.find((h: House) => h.id === apartment.id_house);
-          return {
-            ...apartment,
-            house: house ? { name: house.name, address: house.address } : undefined
-          };
-        });
-        
-        setAllApartments(apartmentsWithHouse);
-        setCategories(categoriesRes.data);
-        setParameters(parametersRes.data);
-        setAttributes(attributesRes.data);
-      } catch (err) {
-        setError('Ошибка загрузки данных');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
+    setIsInitialLoading(true);
     fetchData();
   }, [accessToken]);
 
@@ -374,9 +350,10 @@ const AdminHousesPage = () => {
     }));
   };
 
-  const handleCreateHouse = async () => {
+  const handleCreateHouse = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     try {
-      const res = await axios.post('http://127.0.0.1:8000/api/houses/', {
+      await axios.post('http://127.0.0.1:8000/api/houses/', {
         ...houseForm,
         attributes: houseForm.attributes.map(attr => ({
           id_attribute: attr.attribute.id,
@@ -385,10 +362,10 @@ const AdminHousesPage = () => {
       }, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
-      setHouses([...houses, res.data]);
       setIsCreateHouseModalOpen(false);
       toast.success('Дом успешно создан');
       resetHouseForm();
+      await fetchData();
     } catch (err) {
       toast.error('Ошибка при создании дома');
       console.error(err);
@@ -398,7 +375,7 @@ const AdminHousesPage = () => {
   const handleUpdateHouse = async () => {
     if (!currentHouse) return;
     try {
-      const res = await axios.put(`http://127.0.0.1:8000/api/houses/${currentHouse.id}`, {
+      await axios.put(`http://127.0.0.1:8000/api/houses/${currentHouse.id}`, {
         ...houseForm,
         attributes: houseForm.attributes.map(attr => ({
           id_attribute: attr.attribute.id,
@@ -407,9 +384,9 @@ const AdminHousesPage = () => {
       }, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
-      setHouses(houses.map(house => house.id === currentHouse.id ? res.data : house));
       setIsEditHouseModalOpen(false);
       toast.success('Дом успешно обновлен');
+      await fetchData();
     } catch (err) {
       toast.error('Ошибка при обновлении дома');
       console.error(err);
@@ -422,9 +399,9 @@ const AdminHousesPage = () => {
       await axios.delete(`http://127.0.0.1:8000/api/houses/${currentHouse.id}`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
-      setHouses(houses.filter(house => house.id !== currentHouse.id));
       setIsDeleteHouseModalOpen(false);
       toast.success('Дом успешно удален');
+      await fetchData();
     } catch (err) {
       toast.error('Ошибка при удалении дома');
       console.error(err);
@@ -507,21 +484,16 @@ const AdminHousesPage = () => {
     }));
   };
 
-  const handleCreateApartment = async () => {
+  const handleCreateApartment = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     try {
-      const res = await axios.post('http://127.0.0.1:8000/api/apartments/', apartmentForm, {
+      await axios.post('http://127.0.0.1:8000/api/apartments/', apartmentForm, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
-      const house = houses.find(h => h.id === apartmentForm.id_house);
-      const apartmentWithHouse = {
-        ...res.data,
-        house: house ? { name: house.name, address: house.address } : undefined
-      };
-      
-      setAllApartments([...allApartments, apartmentWithHouse]);
       setIsCreateApartmentModalOpen(false);
       toast.success('Апартамент успешно создан');
       resetApartmentForm();
+      await fetchData();
     } catch (err) {
       toast.error('Ошибка при создании апартамента');
       console.error(err);
@@ -531,19 +503,12 @@ const AdminHousesPage = () => {
   const handleUpdateApartment = async () => {
     if (!currentApartment) return;
     try {
-      const res = await axios.put(`http://127.0.0.1:8000/api/apartments/${currentApartment.id}`, apartmentForm, {
+      await axios.put(`http://127.0.0.1:8000/api/apartments/${currentApartment.id}`, apartmentForm, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
-      
-      const house = houses.find(h => h.id === apartmentForm.id_house);
-      const updatedApartment = {
-        ...res.data,
-        house: house ? { name: house.name, address: house.address } : undefined
-      };
-      
-      setAllApartments(allApartments.map(apt => apt.id === currentApartment.id ? updatedApartment : apt));
       setIsEditApartmentModalOpen(false);
       toast.success('Апартамент успешно обновлен');
+      await fetchData();
     } catch (err) {
       toast.error('Ошибка при обновлении апартамента');
       console.error(err);
@@ -556,9 +521,9 @@ const AdminHousesPage = () => {
       await axios.delete(`http://127.0.0.1:8000/api/apartments/${currentApartment.id}`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
-      setAllApartments(allApartments.filter(apt => apt.id !== currentApartment.id));
       setIsDeleteApartmentModalOpen(false);
       toast.success('Апартамент успешно удален');
+      await fetchData();
     } catch (err) {
       toast.error('Ошибка при удалении апартамента');
       console.error(err);
@@ -582,16 +547,21 @@ const AdminHousesPage = () => {
           'Content-Type': 'multipart/form-data',
         },
       });
-      const res = await axios.get(`http://127.0.0.1:8000/api/apartments/${currentApartment.id}`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
+      
+      const updatedHouses = houses.map(house => {
+        if (house.id === currentApartment.id_house) {
+          const updatedApartments = house.apartments.map(apt => {
+            if (apt.id === currentApartment.id) {
+              return { ...apt, images: [...apt.images, { id: Date.now(), image: URL.createObjectURL(apartmentImageFile) }] };
+            }
+            return apt;
+          });
+          return { ...house, apartments: updatedApartments };
+        }
+        return house;
       });
       
-      const updatedApartment = {
-        ...res.data,
-        house: currentApartment.house
-      };
-      
-      setAllApartments(allApartments.map(apt => apt.id === currentApartment.id ? updatedApartment : apt));
+      setHouses(updatedHouses);
       setApartmentImageFile(null);
       toast.success('Изображение добавлено');
     } catch (err) {
@@ -608,16 +578,20 @@ const AdminHousesPage = () => {
         data: { ids_images: [imageId] },
       });
       
-      const res = await axios.get(`http://127.0.0.1:8000/api/apartments/${currentApartment.id}`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
+      const updatedHouses = houses.map(house => {
+        if (house.id === currentApartment.id_house) {
+          const updatedApartments = house.apartments.map(apt => {
+            if (apt.id === currentApartment.id) {
+              return { ...apt, images: apt.images.filter(img => img.id !== imageId) };
+            }
+            return apt;
+          });
+          return { ...house, apartments: updatedApartments };
+        }
+        return house;
       });
       
-      const updatedApartment = {
-        ...res.data,
-        house: currentApartment.house
-      };
-      
-      setAllApartments(allApartments.map(apt => apt.id === currentApartment.id ? updatedApartment : apt));
+      setHouses(updatedHouses);
       toast.success('Изображение удалено');
     } catch (err) {
       toast.error('Ошибка при удалении изображения');
@@ -634,19 +608,38 @@ const AdminHousesPage = () => {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       
-      const res = await axios.get(`http://127.0.0.1:8000/api/apartments/${currentApartment.id}`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
+      const updatedHouses = houses.map(house => {
+        if (house.id === currentApartment.id_house) {
+          const updatedApartments = house.apartments.map(apt => {
+            if (apt.id === currentApartment.id) {
+              return { ...apt, main_image: imageUrl };
+            }
+            return apt;
+          });
+          return { ...house, apartments: updatedApartments };
+        }
+        return house;
       });
       
-      const updatedApartment = {
-        ...res.data,
-        house: currentApartment.house
-      };
-      
-      setAllApartments(allApartments.map(apt => apt.id === currentApartment.id ? updatedApartment : apt));
+      setHouses(updatedHouses);
       toast.success('Основное изображение обновлено');
     } catch (err) {
       toast.error('Ошибка при обновлении основного изображения');
+      console.error(err);
+    }
+  };
+
+  const handleCreateAttribute = async () => {
+    try {
+      await axios.post('http://127.0.0.1:8000/api/house_attributes/', newAttributeForm, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      setIsCreateAttributeModalOpen(false);
+      setNewAttributeForm({ name: '', description: '' });
+      toast.success('Атрибут успешно добавлен');
+      await fetchData();
+    } catch (err) {
+      toast.error('Ошибка при добавлении атрибута');
       console.error(err);
     }
   };
@@ -691,11 +684,6 @@ const AdminHousesPage = () => {
     return matchesSearch && matchesStatus;
   });
 
-  const filteredApartments = allApartments.filter(apartment => {
-    return apartment.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-           (apartment.house?.name.toLowerCase().includes(searchTerm.toLowerCase()) ?? false);
-  });
-
   const getStatusColor = (status: string) => {
     return statusOptions.find(opt => opt.value === status)?.color || 'bg-gray-400';
   };
@@ -704,27 +692,7 @@ const AdminHousesPage = () => {
     setExpandedHouseId(expandedHouseId === id ? null : id);
   };
 
-  const toggleExpandApartment = (id: number) => {
-    setExpandedApartmentId(expandedApartmentId === id ? null : id);
-  };
-
-  const renderHouseSelectItems = () => {
-    if (!houses || houses.length === 0) {
-      return <SelectItem value="none" disabled>Нет доступных домов</SelectItem>;
-    }
-    
-    return houses.map(house => (
-      <SelectItem
-        key={house.id ?? Math.random()}
-        value={house.id ? house.id.toString() : ''}
-        disabled={typeof house.id !== 'number'}
-      >
-        {(house.name ?? 'Без названия')} ({house.address ?? ''})
-      </SelectItem>
-    ));
-  };
-
-  if (loading) return (
+  if (loading && isInitialLoading) return (
     <div className="flex items-center justify-center h-screen">
       <div className="animate-pulse text-2xl">Загрузка данных...</div>
     </div>
@@ -739,331 +707,275 @@ const AdminHousesPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 p-6">
       <div className="max-w-7xl mx-auto">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-            <TabsList>
-              <TabsTrigger value="houses">
-                <Building className="w-4 h-4 mr-2" />
-                Дома ({houses.length})
-              </TabsTrigger>
-              <TabsTrigger value="apartments">
-                <Hotel className="w-4 h-4 mr-2" />
-                Апартаменты ({allApartments.length})
-              </TabsTrigger>
-            </TabsList>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-6">
+          <h1 className="text-2xl font-bold">Управление домами</h1>
+          
+          <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+            <Input
+              placeholder="Поиск по названию или адресу"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="max-w-md"
+            />
             
-            <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-              <Input
-                placeholder={`Поиск по ${activeTab === 'houses' ? 'названию или адресу' : 'названию'}`}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="max-w-md"
-              />
-              
-              {activeTab === 'houses' && (
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="min-w-[180px]">
-                    <SelectValue placeholder="Все статусы" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Все статусы</SelectItem>
-                    {statusOptions.map(option => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}          
-              <Button onClick={() => activeTab === 'houses' ? setIsCreateHouseModalOpen(true) : setIsCreateApartmentModalOpen(true)} className="gap-2">
-                <Plus size={18} />
-                {activeTab === 'houses' ? 'Добавить дом' : 'Добавить апартамент'}
-              </Button>
-            </div>
+            <select
+              className="min-w-[180px] border rounded px-2 py-1"
+              value={statusFilter}
+              onChange={e => setStatusFilter(e.target.value)}
+            >
+              <option value="">Все статусы</option>
+              {statusOptions.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            
+            <Button 
+              onClick={() => setIsCreateHouseModalOpen(true)} 
+              className="gap-2"
+            >
+              <Plus size={18} />
+              Добавить дом
+            </Button>
           </div>
+        </div>
 
-          <TabsContent value="houses">
-            {filteredHouses.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12">
-                <Home className="w-16 h-16 text-gray-400 mb-4" />
-                <h3 className="text-xl font-medium text-gray-500">Дома не найдены</h3>
-                <p className="text-gray-400 mb-4">Попробуйте изменить параметры поиска</p>
-                <Button onClick={() => { setSearchTerm(''); setStatusFilter(''); }}>
-                  Сбросить фильтры
-                </Button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredHouses.map(house => {
-                  const isExpanded = expandedHouseId === house.id;
-                  return (
-                    <motion.div
-                      key={house.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3 }}
-                      whileHover={{ scale: 1.02 }}
-                      className="flex"
-                    >
-                      <Card className="flex flex-col shadow-md hover:shadow-lg transition-shadow w-full">
-                        {house.main_image && (
-                          <div className="relative h-48 overflow-hidden rounded-t-lg">
-                            <Image
-                              src={`http://127.0.0.1:8000/${house.main_image}`}
-                              alt={house.name}
-                              fill
-                              className="object-cover rounded-t-lg"
-                              unoptimized
-                              priority
-                            />
-                            <div className={`absolute top-3 left-3 px-3 py-1 rounded-full text-white text-sm font-medium ${getStatusColor(house.status)}`}>
-                              {statusOptions.find(s => s.value === house.status)?.label}
-                            </div>
-                          </div>
-                        )}
-                        <CardHeader>
-                          <CardTitle className="flex justify-between items-start">
-                            <span>{house.name}</span>
-                            <span className="text-lg font-bold">
-                              {house.final_price ? `${house.final_price.toLocaleString()} ₽` : '—'}
-                            </span>
-                          </CardTitle>
-                          <CardDescription className="flex items-center gap-1 text-sm">
-                            <MapPin className="w-4 h-4" />
-                            {house.district}, {house.address}
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent className="flex-1 grid grid-cols-2 gap-2 text-sm">
-                          <div className="flex items-center gap-2">
-                            <Layers className="w-4 h-4 text-gray-500" />
-                            {house.floors} этажей
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <DoorOpen className="w-4 h-4 text-gray-500" />
-                            {house.entrances} подъездов
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Calendar className="w-4 h-4 text-gray-500" />
-                            {house.begin_date || '—'}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <DollarSign className="w-4 h-4 text-gray-500" />
-                            От {house.start_price ? `${house.start_price.toLocaleString()} ₽` : '—'}
-                          </div>
-                        </CardContent>
-                        <CardFooter className="flex justify-between gap-2 flex-wrap min-w-0 overflow-x-auto">
+        {filteredHouses.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12">
+            <Home className="w-16 h-16 text-gray-400 mb-4" />
+            <h3 className="text-xl font-medium text-gray-500">Дома не найдены</h3>
+            <p className="text-gray-400 mb-4">Попробуйте изменить параметры поиска</p>
+            <Button onClick={() => { setSearchTerm(''); setStatusFilter(''); }}>
+              Сбросить фильтры
+            </Button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start auto-rows-max">
+            {filteredHouses.map((house, houseIdx) => {
+              const isExpanded = expandedHouseId === house.id;
+              return (
+                <div key={house.id ?? `house-${houseIdx}`}>
+                  <Card className="flex flex-col shadow-md hover:shadow-lg transition-shadow w-full">
+                    {house.main_image && (
+                      <div className="relative h-48 overflow-hidden rounded-t-lg">
+                        <Image
+                          src={`http://127.0.0.1:8000/${house.main_image}`}
+                          alt={house.name}
+                          fill
+                          className="object-cover rounded-t-lg"
+                          unoptimized
+                          priority
+                        />
+                        <div className={`absolute top-3 left-3 px-3 py-1 rounded-full text-white text-sm font-medium ${getStatusColor(house.status)}`}>
+                          {statusOptions.find(s => s.value === house.status)?.label}
+                        </div>
+                      </div>
+                    )}
+                    <CardHeader>
+                      <CardTitle className="flex justify-between items-start">
+                        <span>{house.name}</span>
+                        <span className="text-lg font-bold">
+                          {house.final_price ? `${house.final_price.toLocaleString()} ₽` : '—'}
+                        </span>
+                      </CardTitle>
+                      <CardDescription className="flex items-center gap-1 text-sm">
+                        <MapPin className="w-4 h-4" />
+                        {house.district}, {house.address}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex-1 grid grid-cols-2 gap-2 text-sm">
+                      <div className="flex items-center gap-2">
+                        <Layers className="w-4 h-4 text-gray-500" />
+                        {house.floors} этажей
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <DoorOpen className="w-4 h-4 text-gray-500" />
+                        {house.entrances} подъездов
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-gray-500" />
+                        {house.begin_date || '—'}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <DollarSign className="w-4 h-4 text-gray-500" />
+                        От {house.start_price ? `${house.start_price.toLocaleString()} ₽` : '—'}
+                      </div>
+                    </CardContent>
+                    <CardFooter className="flex flex-col items-end gap-2">
+                      <div className="flex gap-2 flex-wrap w-full">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => toggleExpandHouse(house.id ?? 0)}
+                          className="flex-1 min-w-[120px]"
+                        >
+                          {isExpanded ? (
+                            <ChevronUp className="h-4 w-4 mr-2" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4 mr-2" />
+                          )}
+                          {isExpanded ? 'Свернуть' : 'Подробнее'}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setCurrentHouse(house);
+                            setHouseForm({
+                              name: house.name,
+                              description: house.description,
+                              status: house.status,
+                              is_order: house.is_order,
+                              district: house.district,
+                              address: house.address,
+                              floors: house.floors,
+                              entrances: house.entrances,
+                              begin_date: house.begin_date,
+                              end_date: house.end_date,
+                              start_price: house.start_price,
+                              final_price: house.final_price,
+                              attributes: house.attributes
+                            });
+                            setIsEditHouseModalOpen(true);
+                          }}
+                          className="flex-1 min-w-[120px]"
+                        >
+                          <Edit className="w-4 h-4 mr-2" />
+                          Редактировать
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setCurrentHouse(house);
+                            setIsHouseImageModalOpen(true);
+                          }}
+                          className="flex-1 min-w-[120px]"
+                        >
+                          <ImageIcon className="w-4 h-4 mr-2" />
+                          Изображения
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => {
+                            setCurrentHouse(house);
+                            setIsDeleteHouseModalOpen(true);
+                          }}
+                          className="flex-1 min-w-[120px]"
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Удалить
+                        </Button>
+                      </div>
+                    </CardFooter>
+
+                    {isExpanded && (
+                      <div className="p-4 border-t bg-white">
+                        <div className="flex justify-between items-center mb-4">
+                          <h3 className="font-medium">Апартаменты в этом доме</h3>
                           <Button
-                            variant="outline"
                             size="sm"
                             onClick={() => {
                               setCurrentHouse(house);
-                              setIsHouseInfoModalOpen(true);
+                              setApartmentForm({
+                                ...apartmentForm,
+                                id_house: house.id ?? 0
+                              });
+                              setIsCreateApartmentModalOpen(true);
                             }}
                           >
-                            Подробнее
+                            <Plus className="w-4 h-4 mr-2" />
+                            Добавить апартамент
                           </Button>
-                        </CardFooter>
-                        {isExpanded && (
-                          <div
-                            id={`house-apartments-${house.id}`}
-                            className="p-4 border-t bg-white"
-                          >
-                            <h3 className="font-medium mb-2">Апартаменты в этом доме</h3>
-                            {house.apartments.length === 0 ? (
-                              <p className="text-sm text-gray-500">Нет апартаментов</p>
-                            ) : (
-                              <div className="grid grid-cols-1 gap-2">
-                                {house.apartments.map(apartment => (
-                                  <div key={apartment.id} className="p-3 border rounded-lg">
-                                    <div className="flex justify-between items-center">
-                                      <div>
-                                        <h4 className="font-medium">{apartment.name}</h4>
-                                        <p className="text-sm text-gray-600">
-                                          {apartment.rooms} комн. • {apartment.area} м² • {apartment.count} шт.
-                                        </p>
-                                      </div>
-                                      <Badge variant="outline">
-                                        {apartment.category.name}
-                                      </Badge>
-                                    </div>
+                        </div>
+                        
+                        {house.apartments.length === 0 ? (
+                          <p className="text-sm text-gray-500">Нет апартаментов</p>
+                        ) : (
+                          <div className="space-y-3">
+                            {house.apartments.map((apartment, aptIdx) => (
+                              <div key={apartment.id ?? `apt-${aptIdx}`} className="p-3 border rounded-lg">
+                                <div className="flex justify-between items-start mb-2">
+                                  <div>
+                                    <h4 className="font-medium">{apartment.name}</h4>
+                                    <p className="text-sm text-gray-600">
+                                      {apartment.rooms} комн. • {apartment.area} м² • {apartment.count} шт.
+                                    </p>
+                                    {apartment.description && (
+                                      <p className="text-xs text-gray-500 mt-1">{apartment.description}</p>
+                                    )}
                                   </div>
-                                ))}
+                                  <Badge variant="outline">
+                                    {apartment.category?.name ?? '—'}
+                                  </Badge>
+                                </div>
+                                <div className="flex flex-wrap gap-2 w-full">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      setCurrentApartment(apartment);
+                                      setIsApartmentImageModalOpen(true);
+                                    }}
+                                    className="flex-1 min-w-[120px] max-w-full"
+                                  >
+                                    <ImageIcon className="w-4 h-4 mr-2" />
+                                    Изображения
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      setCurrentApartment(apartment);
+                                      setApartmentForm({
+                                        name: apartment.name,
+                                        description: apartment.description,
+                                        id_category: apartment.category.id,
+                                        rooms: apartment.rooms,
+                                        area: apartment.area,
+                                        id_house: apartment.id_house,
+                                        count: apartment.count,
+                                        parameters: apartment.parameters.map(p => ({
+                                          id_parameter: p.parameter.id,
+                                          value: p.value
+                                        })),
+                                      });
+                                      setIsEditApartmentModalOpen(true);
+                                    }}
+                                    className="flex-1 min-w-[120px] max-w-full"
+                                  >
+                                    <Edit className="w-4 h-4 mr-2" />
+                                    Редактировать
+                                  </Button>
+                                  <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    onClick={() => {
+                                      setCurrentApartment(apartment);
+                                      setIsDeleteApartmentModalOpen(true);
+                                    }}
+                                    className="flex-1 min-w-[120px] max-w-full"
+                                  >
+                                    <Trash2 className="w-4 h-4 mr-2" />
+                                    Удалить
+                                  </Button>
+                                </div>
                               </div>
-                            )}
+                            ))}
                           </div>
                         )}
-                      </Card>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="apartments">
-            {filteredApartments.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12">
-                <Hotel className="w-16 h-16 text-gray-400 mb-4" />
-                <h3 className="text-xl font-medium text-gray-500">Апартаменты не найдены</h3>
-                <p className="text-gray-400 mb-4">Попробуйте изменить параметры поиска</p>
-                <Button onClick={() => setSearchTerm('')}>
-                  Сбросить фильтры
-                </Button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredApartments.map(apartment => (
-                  <motion.div 
-                    key={apartment.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                    whileHover={{ scale: 1.02 }}
-                  >
-                    <Card className="h-full flex flex-col shadow-md hover:shadow-lg transition-shadow">
-                      {apartment.main_image && (
-                        <div className="relative h-48 overflow-hidden rounded-t-lg">
-                          <Image
-                            src={
-                              apartment.main_image.startsWith('http')
-                                ? apartment.main_image
-                                : `http://127.0.0.1:8000/${apartment.main_image}`
-                            }
-                            alt={apartment.name}
-                            fill
-                            className="object-cover rounded-t-lg"
-                            unoptimized
-                            priority
-                          />
-                          <Badge className="absolute top-3 left-3">
-                            {apartment.category.name}
-                          </Badge>
-                        </div>
-                      )}
-                      <CardHeader>
-                        <CardTitle className="flex justify-between items-start">
-                          <span>{apartment.name}</span>
-                          <span className="text-lg font-bold">
-                            {apartment.area} м²
-                          </span>
-                        </CardTitle>
-                        <CardDescription className="flex flex-col gap-1 text-sm">
-                          <div className="flex items-center gap-1">
-                            <Building className="w-4 h-4" />
-                            {apartment.house?.name || 'Не указан дом'}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <MapPin className="w-4 h-4" />
-                            {apartment.house?.address || 'Не указан адрес'}
-                          </div>
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="flex-1 grid grid-cols-2 gap-2 text-sm">
-                        <div className="flex items-center gap-2">
-                          <DoorOpen className="w-4 h-4 text-gray-500" />
-                          {apartment.rooms} комнат
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Home className="w-4 h-4 text-gray-500" />
-                          {apartment.area} м²
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Layers className="w-4 h-4 text-gray-500" />
-                          {apartment.count} шт.
-                        </div>
-                      </CardContent>
-                      <CardFooter className="flex justify-between gap-2 flex-wrap min-w-0 overflow-x-auto">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => toggleExpandApartment(apartment.id)}
-                        >
-                          {expandedApartmentId === apartment.id ? (
-                            <ChevronUp className="h-4 w-4" />
-                          ) : (
-                            <ChevronDown className="h-4 w-4" />
-                          )}
-                          Подробнее
-                        </Button>
-                        <div className="flex gap-2 flex-wrap min-w-0">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            onClick={() => {
-                              setCurrentApartment(apartment);
-                              setIsApartmentImageModalOpen(true);
-                            }}
-                          >
-                            <ImageIcon className="w-4 h-4 mr-2" />
-                            Изображения
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            onClick={() => {
-                              setCurrentApartment(apartment);
-                              setApartmentForm({
-                                name: apartment.name,
-                                description: apartment.description,
-                                id_category: apartment.category.id,
-                                rooms: apartment.rooms,
-                                area: apartment.area,
-                                id_house: apartment.id_house,
-                                count: apartment.count,
-                                parameters: apartment.parameters.map(p => ({
-                                  id_parameter: p.parameter.id,
-                                  value: p.value
-                                })),
-                              });
-                              setIsEditApartmentModalOpen(true);
-                            }}
-                          >
-                            <Edit className="w-4 h-4 mr-2" />
-                            Редактировать
-                          </Button>
-                          <Button 
-                            variant="destructive" 
-                            size="sm" 
-                            onClick={() => {
-                              setCurrentApartment(apartment);
-                              setIsDeleteApartmentModalOpen(true);
-                            }}
-                          >
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            Удалить
-                          </Button>
-                        </div>
-                      </CardFooter>
-
-                      {expandedApartmentId === apartment.id && (
-                        <div className="p-4 border-t">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                              <h4 className="font-medium mb-2">Описание</h4>
-                              <p className="text-sm text-gray-600">
-                                {apartment.description || 'Описание отсутствует'}
-                              </p>
-                            </div>
-                            <div>
-                              <h4 className="font-medium mb-2">Параметры</h4>
-                              <div className="grid grid-cols-1 gap-2">
-                                {apartment.parameters.map(param => (
-                                  <div key={param.parameter.id} className="text-sm">
-                                    <span className="text-gray-500">{param.parameter.name}:</span> {param.value}
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </Card>
-                  </motion.div>
-                ))}
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
+                      </div>
+                    )}
+                  </Card>
+                </div>
+              );
+            })}
+            <AdminSidebar />
+          </div>
+          
+        )}
 
         <Dialog open={isCreateHouseModalOpen} onOpenChange={setIsCreateHouseModalOpen}>
           <DialogContent className="max-w-2xl">
@@ -1081,21 +993,17 @@ const AdminHousesPage = () => {
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Статус</label>
-                <Select
+                <select
+                  className="w-full border rounded px-2 py-1"
                   value={houseForm.status}
-                  onValueChange={(value) => setHouseForm({...houseForm, status: value})}
+                  onChange={e => setHouseForm({ ...houseForm, status: e.target.value })}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Выберите статус" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {statusOptions.map(option => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  {statusOptions.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Район</label>
@@ -1214,13 +1122,21 @@ const AdminHousesPage = () => {
                     }));
                   }}
                 />
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="mt-2"
+                  onClick={() => setIsCreateAttributeModalOpen(true)}
+                >
+                  + Добавить новый атрибут
+                </Button>
               </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsCreateHouseModalOpen(false)}>
                 Отмена
               </Button>
-              <Button onClick={handleCreateHouse}>Создать</Button>
+              <Button type="button" onClick={handleCreateHouse}>Создать</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -1241,21 +1157,17 @@ const AdminHousesPage = () => {
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Статус</label>
-                <Select
+                <select
+                  className="w-full border rounded px-2 py-1"
                   value={houseForm.status}
-                  onValueChange={(value) => setHouseForm({...houseForm, status: value})}
+                  onChange={e => setHouseForm({ ...houseForm, status: e.target.value })}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Выберите статус" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {statusOptions.map(option => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  {statusOptions.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Район</label>
@@ -1374,6 +1286,14 @@ const AdminHousesPage = () => {
                     }));
                   }}
                 />
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="mt-2"
+                  onClick={() => setIsCreateAttributeModalOpen(true)}
+                >
+                  + Добавить новый атрибут
+                </Button>
               </div>
             </div>
             <DialogFooter>
@@ -1424,13 +1344,6 @@ const AdminHousesPage = () => {
                       />
                       <div className="absolute inset-0 bg-black/20 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => handleSetMainHouseImage(img.image)}
-                        >
-                          Сделать основным
-                        </Button>
-                        <Button
                           variant="destructive"
                           size="sm"
                           onClick={() => handleDeleteHouseImage(img.id)}
@@ -1438,6 +1351,9 @@ const AdminHousesPage = () => {
                           Удалить
                         </Button>
                       </div>
+                      {currentHouse.main_image === img.image && (
+                        <Badge className="absolute top-2 left-2">Основное</Badge>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -1474,9 +1390,10 @@ const AdminHousesPage = () => {
         </Dialog>
 
         <Dialog open={isCreateApartmentModalOpen} onOpenChange={setIsCreateApartmentModalOpen}>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl overflow-y-auto max-h-[90vh]">
             <DialogHeader>
               <DialogTitle>Добавить апартамент</DialogTitle>
+              <DialogDescription>Дом: {currentHouse?.name}</DialogDescription>
             </DialogHeader>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
               <div className="space-y-2">
@@ -1489,43 +1406,18 @@ const AdminHousesPage = () => {
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Категория</label>
-                <Select
+                <select
+                  className="w-full border rounded px-2 py-1"
                   value={apartmentForm.id_category.toString()}
-                  onValueChange={(value) => setApartmentForm({...apartmentForm, id_category: Number(value)})}
+                  onChange={e => setApartmentForm({ ...apartmentForm, id_category: Number(e.target.value) })}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Выберите категорию" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map(category => (
-                      <SelectItem key={category.id} value={category.id.toString()}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Дом</label>
-                <Select
-                  value={apartmentForm.id_house.toString()}
-                  onValueChange={(value) => setApartmentForm({...apartmentForm, id_house: Number(value)})}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Выберите дом" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {houses.map(house => (
-                      <SelectItem
-                        key={house.id ?? Math.random()}
-                        value={house.id ? house.id.toString() : ''}
-                        disabled={typeof house.id !== 'number'}
-                      >
-                        {(house.name ?? 'Без названия')} ({house.address ?? ''})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  <option value="0">Выберите категорию</option>
+                  {categories.map(category => (
+                    <option key={category.id} value={category.id.toString()}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Количество комнат</label>
@@ -1594,15 +1486,16 @@ const AdminHousesPage = () => {
               <Button variant="outline" onClick={() => setIsCreateApartmentModalOpen(false)}>
                 Отмена
               </Button>
-              <Button onClick={handleCreateApartment}>Создать</Button>
+              <Button type="button" onClick={handleCreateApartment}>Создать</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
 
         <Dialog open={isEditApartmentModalOpen} onOpenChange={setIsEditApartmentModalOpen}>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl overflow-y-auto max-h-[90vh]">
             <DialogHeader>
               <DialogTitle>Редактировать апартамент</DialogTitle>
+              <DialogDescription>{currentApartment?.name}</DialogDescription>
             </DialogHeader>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
               <div className="space-y-2">
@@ -1615,43 +1508,18 @@ const AdminHousesPage = () => {
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Категория</label>
-                <Select
+                <select
+                  className="w-full border rounded px-2 py-1"
                   value={apartmentForm.id_category.toString()}
-                  onValueChange={(value) => setApartmentForm({...apartmentForm, id_category: Number(value)})}
+                  onChange={e => setApartmentForm({ ...apartmentForm, id_category: Number(e.target.value) })}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Выберите категорию" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map(category => (
-                      <SelectItem key={category.id} value={category.id.toString()}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Дом</label>
-                <Select
-                  value={apartmentForm.id_house.toString()}
-                  onValueChange={(value) => setApartmentForm({...apartmentForm, id_house: Number(value)})}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Выберите дом" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {houses.map(house => (
-                      <SelectItem
-                        key={house.id ?? Math.random()}
-                        value={house.id ? house.id.toString() : ''}
-                        disabled={typeof house.id !== 'number'}
-                      >
-                        {(house.name ?? 'Без названия')} ({house.address ?? ''})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  <option value="0">Выберите категорию</option>
+                  {categories.map(category => (
+                    <option key={category.id} value={category.id.toString()}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Количество комнат</label>
@@ -1733,7 +1601,7 @@ const AdminHousesPage = () => {
             </DialogHeader>
             {currentApartment && (
               <div className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-h-[400px] overflow-y-auto">
                   {currentApartment.main_image && (
                     <div className="relative group h-48">
                       <Image
@@ -1767,13 +1635,6 @@ const AdminHousesPage = () => {
                         unoptimized
                       />
                       <div className="absolute inset-0 bg-black/20 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => handleSetMainApartmentImage(img.image)}
-                        >
-                          Сделать основным
-                        </Button>
                         <Button
                           variant="destructive"
                           size="sm"
@@ -1817,148 +1678,32 @@ const AdminHousesPage = () => {
           </DialogContent>
         </Dialog>
 
-        <Dialog open={isHouseInfoModalOpen} onOpenChange={setIsHouseInfoModalOpen}>
-          <DialogContent className="max-w-lg">
+        <Dialog open={isCreateAttributeModalOpen} onOpenChange={setIsCreateAttributeModalOpen}>
+          <DialogContent>
             <DialogHeader>
-              <DialogTitle>Информация о доме</DialogTitle>
-              <DialogDescription>
-                {currentHouse?.name}
-              </DialogDescription>
+              <DialogTitle>Добавить новый атрибут дома</DialogTitle>
             </DialogHeader>
-            {currentHouse && (
-              <div className="space-y-2">
-                <div>
-                  <span className="font-semibold">Адрес: </span>
-                  {currentHouse.address}
-                </div>
-                <div>
-                  <span className="font-semibold">Район: </span>
-                  {currentHouse.district}
-                </div>
-                <div>
-                  <span className="font-semibold">Статус: </span>
-                  {statusOptions.find(s => s.value === currentHouse.status)?.label}
-                </div>
-                <div>
-                  <span className="font-semibold">Этажей: </span>
-                  {currentHouse.floors}
-                </div>
-                <div>
-                  <span className="font-semibold">Подъездов: </span>
-                  {currentHouse.entrances}
-                </div>
-                <div>
-                  <span className="font-semibold">Дата начала: </span>
-                  {currentHouse.begin_date}
-                </div>
-                <div>
-                  <span className="font-semibold">Дата окончания: </span>
-                  {currentHouse.end_date}
-                </div>
-                <div>
-                  <span className="font-semibold">Начальная цена: </span>
-                  {currentHouse.start_price ? `${currentHouse.start_price.toLocaleString()} ₽` : '—'}
-                </div>
-                <div>
-                  <span className="font-semibold">Финальная цена: </span>
-                  {currentHouse.final_price ? `${currentHouse.final_price.toLocaleString()} ₽` : '—'}
-                </div>
-                <div>
-                  <span className="font-semibold">Описание: </span>
-                  {currentHouse.description || '—'}
-                </div>
-                {currentHouse.attributes && currentHouse.attributes.length > 0 && (
-                  <div className="mt-4">
-                    <h4 className="font-semibold mb-2">Атрибуты</h4>
-                    <div className="space-y-2">
-                      {currentHouse.attributes.map(attr => (
-                        <div key={attr.attribute.id} className="flex items-center gap-2">
-                          <span className="font-medium">{attr.attribute.name}:</span>
-                          <span>{attr.value}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                <div className="mt-6">
-                  <h4 className="font-semibold mb-2">Апартаменты в этом доме</h4>
-                  {currentHouse.apartments && currentHouse.apartments.length > 0 ? (
-                    <div className="space-y-2 max-h-60 overflow-y-auto">
-                      {currentHouse.apartments.map(apartment => (
-                        <div key={apartment.id} className="p-2 border rounded flex justify-between items-center">
-                          <div>
-                            <div className="font-medium">{apartment.name}</div>
-                            <div className="text-sm text-gray-600">
-                              {apartment.rooms} комн. • {apartment.area} м² • {apartment.count} шт.
-                            </div>
-                          </div>
-                          <Badge variant="outline">{apartment.category.name}</Badge>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-sm text-gray-500">Нет апартаментов</div>
-                  )}
-                </div>
-                <div className="flex gap-2 flex-wrap mt-4">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => {
-                      setIsHouseInfoModalOpen(false);
-                      setCurrentHouse(currentHouse);
-                      setIsHouseImageModalOpen(true);
-                    }}
-                  >
-                    <ImageIcon className="w-4 h-4 mr-2" />
-                    Изображения
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => {
-                      setIsHouseInfoModalOpen(false);
-                      setCurrentHouse(currentHouse);
-                      setHouseForm({
-                        name: currentHouse.name,
-                        description: currentHouse.description,
-                        status: currentHouse.status,
-                        is_order: currentHouse.is_order,
-                        district: currentHouse.district,
-                        address: currentHouse.address,
-                        floors: currentHouse.floors,
-                        entrances: currentHouse.entrances,
-                        begin_date: currentHouse.begin_date,
-                        end_date: currentHouse.end_date,
-                        start_price: currentHouse.start_price,
-                        final_price: currentHouse.final_price,
-                        attributes: currentHouse.attributes
-                      });
-                      setIsEditHouseModalOpen(true);
-                    }}
-                  >
-                    <Edit className="w-4 h-4 mr-2" />
-                    Редактировать
-                  </Button>
-                  <Button 
-                    variant="destructive" 
-                    size="sm" 
-                    onClick={() => {
-                      setIsHouseInfoModalOpen(false);
-                      setCurrentHouse(currentHouse);
-                      setIsDeleteHouseModalOpen(true);
-                    }}
-                  >
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Удалить
-                  </Button>
-                </div>
+            <div className="space-y-4 py-2">
+              <div>
+                <label className="text-sm font-medium">Название</label>
+                <Input
+                  value={newAttributeForm.name}
+                  onChange={e => setNewAttributeForm(f => ({ ...f, name: e.target.value }))}
+                />
               </div>
-            )}
+              <div>
+                <label className="text-sm font-medium">Описание</label>
+                <Textarea
+                  value={newAttributeForm.description}
+                  onChange={e => setNewAttributeForm(f => ({ ...f, description: e.target.value }))}
+                />
+              </div>
+            </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsHouseInfoModalOpen(false)}>
-                Закрыть
+              <Button variant="outline" onClick={() => setIsCreateAttributeModalOpen(false)}>
+                Отмена
               </Button>
+              <Button onClick={handleCreateAttribute}>Добавить</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

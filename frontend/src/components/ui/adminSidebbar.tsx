@@ -8,7 +8,7 @@ import { motion } from 'framer-motion';
 const navItems = [
   { href: '/admin/houses', icon: <Building2 className="w-6 h-6" />, label: 'Дома' },
   { href: '/admin/orders', icon: <PackageSearch className="w-6 h-6" />, label: 'Заказы' },
-  { href: '/admin/users', icon: <UserCog className="w-6 h-6" />, label: 'Пользователи' },
+  { href: '/admin/attributes', icon: <UserCog className="w-6 h-6" />, label: 'Атрибуты' },
 ];
 
 export default function AdminSidebar() {
@@ -17,8 +17,10 @@ export default function AdminSidebar() {
   return (
     <nav className="fixed top-0 right-0 h-full w-20 bg-white border-l border-gray-200 shadow-lg flex flex-col items-center py-8">
       <div className="mb-12 flex flex-col items-center space-y-2">
+        <Link href="/admin">
         <Shield className="w-8 h-8 text-blue-600" />
-        <span className="text-xs font-semibold text-blue-600 select-none">Admin</span>
+         <span className="text-xs font-semibold text-blue-600 select-none">Админ</span>
+         </Link>
       </div>
 
       <ul className="flex flex-col gap-6 w-full">

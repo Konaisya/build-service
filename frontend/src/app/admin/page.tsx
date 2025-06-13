@@ -165,7 +165,7 @@ const AdminPage = () => {
             </motion.div>
           </Link>
 
-          <Link href="/admin/users">
+          <Link href="/admin/attributes">
             <motion.div 
               whileHover={{ y: -8, boxShadow: "0 12px 30px -8px rgba(0, 0, 0, 0.12)" }}
               whileTap={{ scale: 0.97 }}
@@ -180,9 +180,9 @@ const AdminPage = () => {
                   <div className="p-4 bg-green-50 rounded-full group-hover:bg-green-100 transition-colors duration-300">
                     <UserCog className="w-8 h-8 text-green-600" />
                   </div>
-                  <h2 className="text-xl font-semibold">Управление пользователями</h2>
+                  <h2 className="text-xl font-semibold">Атрибуты и параметры</h2>
                   <p className="text-muted-foreground text-sm">
-                    Управляйте учетными записями и правами пользователей
+                    Управление атрибутами домов, параметрами и категориями квартир
                   </p>
                   <Button variant="outline" className="mt-2 gap-2">
                     Перейти <span className="text-green-600">→</span>
